@@ -1,0 +1,103 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+
+    <Compile Include="basis\Void.fs" />
+
+    <Compile Include="basis\SymbolMap.fs" />
+
+    <Compile Include="basis\Symbol.fs" />
+
+    <Compile Include="basis\PpExn.fs" />
+
+    <Compile Include="basis\Pp.fs" />
+
+    <Compile Include="basis\PersistentTable.fs" />
+
+    <Compile Include="basis\Monad.fs" />
+
+    <Compile Include="basis\ListUtil.fs" />
+
+    <Compile Include="basis\LexingUtil.fs" />
+
+    <Compile Include="basis\DisjointSet.fs" />
+
+    <Compile Include="basis\Bwd.fs" />
+   
+
+    <Compile Include="core\Veil.fs" />
+
+    <Compile Include="core\TermBuilder.fs" />
+
+    <Compile Include="core\Tactic.fs" />
+
+    <Compile Include="core\SyntaxPrecedence.fs" />
+    <Compile Include="core\SyntaxData.fs" />
+
+    <Compile Include="core\Syntax.fs" />
+
+    <Compile Include="core\Splice.fs" />
+
+    <Compile Include="core\Serialize.fs" />
+
+    <Compile Include="core\Semantics.fs" />
+
+    <Compile Include="core\RefineState.fs" />
+
+    <Compile Include="core\Refiner.fs" />
+
+    <Compile Include="core\RefineMonad.fs" />
+    <Compile Include="core\RefineErrorData.fs" />
+
+    <Compile Include="core\RefineError.fs" />
+
+    <Compile Include="core\RefineEnv.fs" />
+
+    <Compile Include="core\Quote.fs" />
+
+    <Compile Include="core\Namespace.fs" />
+
+    <Compile Include="core\Monads.fs" />
+
+    <Compile Include="core\Log.fs" />
+
+    <Compile Include="core\Ident.fs" />
+    <Compile Include="core\DomainData.fs" />
+
+    <Compile Include="core\Domain.fs" />
+
+    <Compile Include="core\Debug.fs" />
+
+    <Compile Include="core\Conversion.fs" />
+
+    <Compile Include="core\CodeUnit.fs" />
+
+    <Compile Include="cubical\DimProbe.fs" />
+    <Compile Include="cubical\Dim.fs" />
+    <Compile Include="cubical\cubical.fs" />
+    <Compile Include="cubical\CofThyData.fs" />
+    <Compile Include="cubical\CofThy.fs" />
+    <Compile Include="cubical\Cof.fs" />
+    <Compile Include="frontend\Tactics.fs" />
+    <Compile Include="frontend\Load.fs" />
+    <Content Include="frontend\Lex.mll" />
+    <Content Include="frontend\Grammar.mly" />
+    <Compile Include="frontend\Elaborator.fs" />
+    <Compile Include="frontend\ElabError.fs" />
+    <Compile Include="frontend\DriverMessage.fs" />
+    <Compile Include="frontend\ConcreteSyntax.fs" />
+    <Compile Include="frontend\Driver.fs" />
+    <Compile Include="main.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="bin\Debug\net5.0" />
+  </ItemGroup>
+
+</Project>
