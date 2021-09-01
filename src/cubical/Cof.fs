@@ -1,3 +1,4 @@
+module Cubical.Cof
 type ('r, 'a) cof_f =
   | Eq of 'r * 'r
   | Join of 'a list

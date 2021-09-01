@@ -1,12 +1,14 @@
+module Basis.Bwd
+
 type 'a bwd =
   | Emp
   | Snoc of 'a bwd * 'a
 
-[@@deriving show]
+//[@@deriving show]
 
 module BwdNotation =
-struct
-  let (#<) xs x =
+
+  let (%<) xs x =
     Snoc (xs, x)
 
   let rec (<.>) xs ys =
@@ -19,16 +21,16 @@ struct
   let rec (<><) xs ys =
     match ys with
     | [] -> xs
-    | y :: ys -> (xs #< y) <>< ys
+    | y :: ys -> (xs %< y) <>< ys
 
   let rec (<>>) xs ys =
     match xs with
     | Emp -> ys
     | Snoc (xs, x) -> xs <>> x :: ys
-end
+
 
 module Bwd =
-struct
+
   open BwdNotation
 
   let rec nth xs i =
@@ -36,37 +38,37 @@ struct
     | Emp ->
       failwith "Bwd.nth"
     | Snoc (_, x) when i = 0 -> x
-    | Snoc (xs, _) -> (nth[@tailcall]) xs @@ i - 1
+    | Snoc (xs, _) -> nth xs (i - 1)
 
   let rec mem a xs =
     match xs with
     | Emp -> false
     | Snoc (xs, x) ->
-      a = x || (mem[@tailcall]) a xs
+      a = x || mem a xs
 
   let rec exists p xs =
     match xs with
     | Emp -> false
     | Snoc (xs, x) ->
-      p x || (exists[@tailcall]) p xs
+      p x || exists p xs
 
   let rec for_all p xs =
     match xs with
     | Emp -> true
     | Snoc (xs, x) ->
-      p x && (for_all[@tailcall]) p xs
+      p x && for_all p xs
 
   let rec iter p xs =
     match xs with
     | Emp -> ()
     | Snoc (xs, x) ->
-      p x; (iter[@tailcall]) p xs
+      p x; iter p xs
 
   let length xs =
     let rec go acc =
       function
       | Emp -> acc
-      | Snoc (xs, _) -> (go[@tailcall]) (acc+1) xs
+      | Snoc (xs, _) -> go (acc+1) xs
     in
     go 0 xs
 
@@ -114,15 +116,15 @@ struct
     | Emp -> e
     | Snoc (l, x) ->
       let e = f x e in
-      (fold_right[@tailcall]) f l e
+      fold_right f l e
 
   let rec fold_right2 f l0 l1 e =
     match l0, l1 with
     | Emp, Emp -> e
     | Snoc (l0, x0), Snoc (l1, x1) ->
       let e = f x0 x1 e in
-      (fold_right2[@tailcall]) f l0 l1 e
-    | _ -> raise @@ Invalid_argument "Bwd.fold_right2"
+      fold_right2 f l0 l1 e
+    | _ -> raise <| invalidArg "Bwd.fold_right2" "Bwd.fold_right2"
   let to_list xs =
     xs <>> []
 
@@ -132,4 +134,4 @@ struct
   (* favonia: the following is considered ILL-TYPED!
    *
    * let rev xs = from_list @@ List.rev @@ to_list xs *)
-end
+

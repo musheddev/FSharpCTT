@@ -1,3 +1,4 @@
+module Core.RefineState
 open CodeUnit
 
 module IDMap = Map.Make (CodeUnitID)

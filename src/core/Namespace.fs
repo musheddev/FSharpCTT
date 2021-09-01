@@ -1,3 +1,4 @@
+module Core.Namespace
 open Yuujinchou
 
 type 'a t = 'a Trie.t

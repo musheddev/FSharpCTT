@@ -1,7 +1,15 @@
+module Cubical.CofThy
+
 open Basis
 open Bwd
 
-type cof = CofThyData.cof
+type var = int
+type cof = (Dim.t, var) Cof.cof
+
+let dump_var fmt i = Format.fprintf fmt "L[%i]" i
+
+let dump_cof = Cof.dump_cof Dim.dump dump_var
+
 
 module UF = DisjointSet.Make (struct type t = Dim.t let compare = compare end)
 module VarSet = Set.Make (struct type t = CofThyData.var let compare = compare end)

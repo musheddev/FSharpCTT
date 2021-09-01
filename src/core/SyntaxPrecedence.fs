@@ -1,3 +1,4 @@
+module Core.SyntaxPrecedence 
 type t = int * int
 
 let nonassoc n = 2*n, 2*n

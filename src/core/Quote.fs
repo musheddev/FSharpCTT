@@ -1,3 +1,4 @@
+module Core.Quote
 open Basis
 open Cubical
 open Monads

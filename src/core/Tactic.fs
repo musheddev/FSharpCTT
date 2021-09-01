@@ -1,3 +1,5 @@
+module Core.Tactic
+
 open Basis
 open Cubical
 open CodeUnit

@@ -1,4 +1,4 @@
-module CodeUnit
+module Core.CodeUnit
 
 open ContainersLabels
 open Basis
@@ -21,7 +21,7 @@ struct
     { origin : CodeUnitID.t;
       index : int;
       name : string option }
-  [@@deriving show]
+  ///[@@deriving show]
 
   let compare s1 s2 =
     Int.compare s1.index s2.index

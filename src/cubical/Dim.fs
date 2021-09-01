@@ -1,3 +1,4 @@
+module Cubicla.Dim
 type t =
   | Dim0
   | Dim1

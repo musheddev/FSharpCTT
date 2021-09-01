@@ -1,3 +1,4 @@
+module Core.Syntax
 open Basis
 open Cubical
 

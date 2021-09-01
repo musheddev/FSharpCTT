@@ -1,3 +1,5 @@
+module Core.Splice
+
 open Basis.Bwd
 open Cubical
 open BwdNotation

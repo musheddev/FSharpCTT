@@ -1,3 +1,5 @@
+module Core.Log
+
 open Basis
 
 type level = [`Info | `Error | `Warn]
