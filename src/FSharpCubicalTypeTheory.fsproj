@@ -11,8 +11,6 @@
 
     <Compile Include="basis\Bwd.fs" />
 
-    <Compile Include="basis\SymbolMap.fs" />
-
     <Compile Include="basis\Symbol.fs" />
 
     <Compile Include="basis\PpExn.fs" />
@@ -28,19 +26,26 @@
     <Compile Include="basis\LexingUtil.fs" />
 
     <Compile Include="basis\DisjointSet.fs" />
+
+    <Compile Include="cubical\DimProbe.fs" />
+    <Compile Include="cubical\Dim.fs" />
+    <Compile Include="cubical\Cof.fs" />
+    <Compile Include="cubical\CofThy.fs" />
+    <Compile Include="core\Ident.fs" />
+    <Compile Include="core\SyntaxData.fs" />
+
+    <Compile Include="core\Syntax.fs" />
+
+    <Compile Include="core\Domain.fs" />
+
+    <Compile Include="core\CodeUnit.fs" />
    
 
     <Compile Include="core\Veil.fs" />
-   
-
-    <Compile Include="core\CodeUnit.fs" />
 
     <Compile Include="core\Tactic.fs" />
 
     <Compile Include="core\SyntaxPrecedence.fs" />
-    <Compile Include="core\SyntaxData.fs" />
-
-    <Compile Include="core\Syntax.fs" />
 
     <Compile Include="core\TermBuilder.fs" />
 
@@ -68,20 +73,13 @@
     <Compile Include="core\Monads.fs" />
 
     <Compile Include="core\Log.fs" />
-
-    <Compile Include="core\Ident.fs" />
     <Compile Include="core\DomainData.fs" />
-
-    <Compile Include="core\Domain.fs" />
 
     <Compile Include="core\Debug.fs" />
 
     <Compile Include="core\Conversion.fs" />
 
-    <Compile Include="cubical\DimProbe.fs" />
-    <Compile Include="cubical\Dim.fs" />
-    <Compile Include="cubical\Cof.fs" />
-    <Compile Include="cubical\CofThy.fs" />
+
     <Compile Include="frontend\Tactics.fs" />
     <Compile Include="frontend\Load.fs" />
     <Content Include="frontend\Lex.mll" />

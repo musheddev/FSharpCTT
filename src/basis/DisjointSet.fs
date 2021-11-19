@@ -1,3 +1,5 @@
+namespace Basis
+
 module type S =
 sig
   type key

@@ -18,25 +18,25 @@ type t =
 let pp fmt =
   function
   | ExpectedSynthesizableTerm orig ->
-    Format.fprintf fmt
+    fprintf fmt
       "@[Type annotation required for@,@[<hv> %a@]@]"
       CS.pp_con_ orig
   | InvalidTypeExpression cs ->
-    Format.fprintf fmt
+    fprintf fmt
       "Invalid type expression: %a"
       CS.pp_con cs
   | MalformedCase ->
-    Format.fprintf fmt "Malformed case"
+    fprintf fmt "Malformed case"
   | CannotEliminate (ppenv, tp) ->
-    Format.fprintf fmt
+    fprintf fmt
       "Cannot eliminate element of type %a"
       (S.pp_tp ppenv) tp
   | ExpectedSimpleInductive (ppenv, tp) ->
-    Format.fprintf fmt
+    fprintf fmt
       "Expected simple inductive type but found %a"
       (S.pp_tp ppenv) tp
   | InvalidModifier cs ->
-    Format.fprintf fmt
+    fprintf fmt
       "Invalid modifier: %a"
       CS.pp_con cs
 

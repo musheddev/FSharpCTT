@@ -1,102 +1,102 @@
-module Core.SyntaxData
-
+namespace Core
 open Basis
 open Cubical
 
 
-type t<'s> =
+
+type SyntaxData<'s> =
   | Var of int
   | Global of 's
-  | Let of t * Ident.t * t
-  | Ann of t * tp
+  | Let of SyntaxData<'s> * Ident * SyntaxData<'s>
+  | Ann of SyntaxData<'s> * tp<'s>
 
   | Zero
-  | Suc of t
-  | NatElim of t * t * t * t
+  | Suc of SyntaxData<'s>
+  | NatElim of SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s>
 
   | Base
-  | Loop of t
-  | CircleElim of t * t * t * t
+  | Loop of SyntaxData<'s>
+  | CircleElim of SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s>
 
-  | Lam of Ident.t * t
-  | Ap of t * t
+  | Lam of Ident * SyntaxData<'s>
+  | Ap of SyntaxData<'s> * SyntaxData<'s>
 
-  | Pair of t * t
-  | Fst of t
-  | Snd of t
+  | Pair of SyntaxData<'s> * SyntaxData<'s>
+  | Fst of SyntaxData<'s>
+  | Snd of SyntaxData<'s>
 
-  | Struct of (string list * t) list
-  | Proj of t * string list
+  | Struct of (string list * SyntaxData<'s>) list
+  | Proj of SyntaxData<'s> * string list
 
-  | Coe of t * t * t * t
-  | HCom of t * t * t * t * t
-  | Com of t * t * t * t * t
+  | Coe of SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s>
+  | HCom of SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s>
+  | Com of SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s>
 
-  | SubIn of t
-  | SubOut of t
+  | SubIn of SyntaxData<'s>
+  | SubOut of SyntaxData<'s>
 
   | Dim0
   | Dim1
-  | Cof of (t, t) Cof.cof_f
-  | ForallCof of t
-  | CofSplit of (t * t) list
+  | Cof of (SyntaxData<'s>, SyntaxData<'s>) Cof_f
+  | ForallCof of SyntaxData<'s>
+  | CofSplit of (SyntaxData<'s> * SyntaxData<'s>) list
   | Prf
 
-  | ElIn of t
-  | ElOut of t
+  | ElIn of SyntaxData<'s>
+  | ElOut of SyntaxData<'s>
 
-  | Box of t * t * t * t * t
-  | Cap of t * t * t * t * t
+  | Box of SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s>
+  | Cap of SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s>
 
-  | VIn of t * t * t * t
-  | VProj of t * t * t * t * t
+  | VIn of SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s>
+  | VProj of SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s>
 
-  | CodeExt of int * t * [`Global of t] * t
-  | CodePi of t * t
-  | CodeSg of t * t
-  | CodeSignature of (string list * t) list
+  | CodeExt of int * SyntaxData<'s> * 's * SyntaxData<'s>
+  | CodePi of SyntaxData<'s> * SyntaxData<'s>
+  | CodeSg of SyntaxData<'s> * SyntaxData<'s>
+  | CodeSignature of (string list * SyntaxData<'s>) list
   | CodeNat
   | CodeUniv
-  | CodeV of t * t * t * t
+  | CodeV of SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s> * SyntaxData<'s>
   | CodeCircle
 
-  | ESub of sub * t
+  | ESub of sub<'s> * SyntaxData<'s>
   (** Explicit substition *)
 
-  | LockedPrfIn of t
-  | LockedPrfUnlock of {tp : tp; cof : t; prf : t; bdy : t}
+  | LockedPrfIn of SyntaxData<'s>
+  | LockedPrfUnlock of tp : tp<'s> * cof : SyntaxData<'s> * prf : SyntaxData<'s> * bdy : SyntaxData<'s>
 
-and tp =
+and tp<'s> =
   | Univ
-  | El of t
+  | El of SyntaxData<'s>
   | TpVar of int
   | TpDim
   | TpCof
-  | TpPrf of t
-  | TpCofSplit of (t * tp) list
-  | Sub of tp * t * t
-  | Pi of tp * Ident.t * tp
-  | Sg of tp * Ident.t * tp
-  | Signature of sign
+  | TpPrf of SyntaxData<'s>
+  | TpCofSplit of (SyntaxData<'s> * tp<'s>) list
+  | Sub of tp<'s> * SyntaxData<'s> * SyntaxData<'s>
+  | Pi of tp<'s> * Ident * tp<'s>
+  | Sg of tp<'s> * Ident * tp<'s>
+  | Signature of sign<'s>
   | Nat
   | Circle
-  | TpESub of sub * tp
-  | TpLockedPrf of t
+  | TpESub of sub<'s> * tp<'s>
+  | TpLockedPrf of SyntaxData<'s>
 
-and sign = (string list * tp) list
+and sign<'s> = (string list * tp<'s>) list
 
 (** The language of substitions from {{:https://arxiv.org/abs/1102.2405} Abel, Coquand, and Pagano}. *)
-and sub =
+and sub<'s> =
   | SbI
   (** The identity substitution [Γ → Γ]. *)
 
-  | SbC of sub * sub
+  | SbC of sub<'s> * sub<'s>
   (** The composition of substitutions [δ ∘ γ]. *)
 
   | Sb1
   (** The terminal substitution [Γ → 1]. *)
 
-  | SbE of sub * t
+  | SbE of sub<'s> * SyntaxData<'s>
   (** The universal substitution into an extended context [<γ, a>]. *)
 
   | SbP

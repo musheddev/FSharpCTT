@@ -1,14 +1,13 @@
-module J = Ezjsonm
+namespace Basis
 
-module type S = sig
-  type t
+type S = 
 
-  val compare : t -> t -> int
-  val equal : t -> t -> bool
+  val compare : S -> S -> int
+  val equal : S -> S -> bool
 
-  val pp : t Pp.printer
-  val show : t -> string
+  val pp : unit //pretty printer
+  val show : S -> string
 
-  val serialize : t -> J.value
-  val deserialize : J.value -> t
-end
+  val serialize : S -> J.value
+  val deserialize : J.value -> S
+

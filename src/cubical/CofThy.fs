@@ -1,31 +1,31 @@
-module Cubical.CofThy
+namespace Cubical
 
 open Basis
 open Bwd
 
 type var = int
-type cof = (Dim.t, var) Cof.cof
+type cof = (Dim, var) Cof
 
-let dump_var fmt i = Format.fprintf fmt "L[%i]" i
+let dump_var fmt i = fprintf fmt "L[%i]" i
 
 let dump_cof = Cof.dump_cof Dim.dump dump_var
 
 
-module UF = DisjointSet.Make (struct type t = Dim.t let compare = compare end)
-module VarSet = Set.Make (struct type t = CofThyData.var let compare = compare end)
+type UF = DisjointSet<Dim>
+type VarSet = Set<var>
 
 (** A presentation of an algebraic theory over the language of intervals and cofibrations. *)
 type alg_thy' =
-  { classes : UF.t;
+  { classes : UF;
     (** equivalence classes of dimensions *)
 
-    true_vars : VarSet.t
+    true_vars : VarSet
   }
 
-type eq = Dim.t * Dim.t
+type eq = Dim * Dim
 
 (** A [branch] represents the meet of a bunch of atomic cofibrations. *)
-type branch = VarSet.t * eq list
+type branch = VarSet * eq list
 type branches = branch list
 
 (** A [cached_branch] is a [branch] together with an algebraic theory
@@ -34,7 +34,9 @@ type cached_branch = alg_thy' * branch
 type cached_branches = cached_branch list
 
 (** As an optimization, we remember when a theory is consistent or not. *)
-type alg_thy = [ `Consistent of alg_thy' | `Inconsistent ]
+type alg_thy =
+  | Consistent of alg_thy'
+  | Inconsistent 
 
 (** A disjoint theory is the join of a list of [cached_branch]. We do not need to
   * remember the common ancestor of these branches (as an algebraic theory), but only
@@ -68,7 +70,7 @@ let rec dissect_cofibrations : cof list -> branches =
         dissect_cofibrations cofs
 
 module Alg =
-struct
+
   type t = alg_thy
   type t' = alg_thy'
 
@@ -77,12 +79,12 @@ struct
      true_vars = VarSet.empty}
 
   let empty =
-    `Consistent emp'
+    Consistent emp'
 
   let consistency =
     function
-    | `Consistent _ -> `Consistent
-    | `Inconsistent -> `Inconsistent
+    | Consistent _ -> Consistent
+    | Inconsistent -> Inconsistent
 
   let assume_vars (thy : t') vars =
     {thy with true_vars = VarSet.union vars thy.true_vars}

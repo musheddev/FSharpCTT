@@ -1,3 +1,6 @@
-type t = |
+namespace Basis
 
-let abort : t -> 'a = function _ -> .
+module Void =
+    type t = unit
+
+    let abort : t -> 'a = function _ -> .

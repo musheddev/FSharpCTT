@@ -1,5 +1,5 @@
-
-include Lexing
+namespace Basis
+open Lexing
 
 type span =
   {start : Lexing.position;
@@ -7,7 +7,7 @@ type span =
 
 let pp_span : span Pp.printer =
   fun fmt span ->
-  Format.fprintf fmt "%a:%i.%i-%i.%i"
+  fprintf fmt "%a:%i.%i-%i.%i"
     (* HACK: We use the basename, rather than the full path here
        to avoid issues with the test suite. This is bad, and should
        be changed once more thought is put into how we want to

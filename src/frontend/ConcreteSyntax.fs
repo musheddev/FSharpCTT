@@ -7,7 +7,7 @@ type info = LexingUtil.span option
 
 let pp_info fmt =
   function
-  | None -> Format.fprintf fmt "Unknown location"
+  | None -> fprintf fmt "Unknown location"
   | Some span ->
     LexingUtil.pp_span fmt span
 

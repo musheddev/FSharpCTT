@@ -1,4 +1,4 @@
-module Basis.Bwd
+namespace Basis
 
 type 'a bwd =
   | Emp

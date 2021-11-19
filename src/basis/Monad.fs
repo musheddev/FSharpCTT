@@ -1,15 +1,15 @@
-module Basis.Monad
+namespace Basis
 open Bwd
 
-module type S = sig
+type S = 
   type 'a m
 
   val ret : 'a -> 'a m
 
   val bind : 'a m -> ('a -> 'b m) -> 'b m
-end
 
-module type Notation = sig
+
+type Notation = sig
   type 'a m
 
   val (let*) : 'a m -> ('a -> 'b m) -> 'b m

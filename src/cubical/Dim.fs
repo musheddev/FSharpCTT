@@ -1,13 +1,15 @@
-module Cubicla.Dim
-type t =
+namespace Cubical
+
+type Dim =
   | Dim0
   | Dim1
   | DimVar of int
-  | DimProbe of DimProbe.t
+  | DimProbe of DimProbe
 
-let dump fmt =
+with
+static member dump fmt =
   function
-  | Dim0 -> Format.fprintf fmt "dim0"
-  | Dim1 -> Format.fprintf fmt "dim1"
-  | DimVar i -> Format.fprintf fmt "dim#var[%i]" i
-  | DimProbe sym -> Format.fprintf fmt "dim#probe[%a]" DimProbe.pp sym
+  | Dim0 -> fprintf fmt "dim0"
+  | Dim1 -> fprintf fmt "dim1"
+  | DimVar i -> fprintf fmt "dim#var[%i]" i
+  | DimProbe sym -> fprintf fmt "dim#probe[%a]" DimProbe.pp sym
