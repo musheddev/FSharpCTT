@@ -8,6 +8,6 @@ type S =
   val pp : unit //pretty printer
   val show : S -> string
 
-  val serialize : S -> J.value
-  val deserialize : J.value -> S
+  // val serialize : S -> J.value
+  // val deserialize : J.value -> S
 

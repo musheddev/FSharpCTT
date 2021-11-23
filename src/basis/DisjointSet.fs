@@ -1,30 +1,16 @@
 namespace Basis
 
-module type S =
-sig
-  type key
-  type t
+module DisjointSet =
+  //type T = PersistentTable.M (O)
 
-  val empty : t
-  val test : key -> key -> t -> bool
-  val union : key -> key -> t -> t
-  val test_and_union : key -> key -> t -> bool * t
-end
-
-module type MAKER = functor (O : Map.OrderedType) -> S with type key = O.t
-
-module Make : MAKER = functor (O : Map.OrderedType) ->
-struct
-  module T = PersistentTable.M (O)
-
-  type key = O.t
+  //type key = O.t
   type t =
-    {rank : int T.t;
+    {rank : Map<int,'a>;
      parent : key T.t}
 
   let empty =
-    {rank = T.empty;
-     parent = T.empty}
+    {rank = PersistentTable.empty;
+     parent = PersistentTable.empty}
 
 
   let find (x : key) (h : t) =

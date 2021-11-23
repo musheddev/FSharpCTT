@@ -2,3 +2,5 @@
 src/.idea/
 
 src/obj
+.fake
+.ionide

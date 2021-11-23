@@ -1,6 +1,5 @@
 namespace Basis
 
 module Void =
-    type t = unit
-
-    let abort : t -> 'a = function _ -> .
+    
+    let abort : unit -> 'a = function _ -> Unchecked.defaultof<'a>
