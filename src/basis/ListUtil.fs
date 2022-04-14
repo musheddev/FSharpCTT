@@ -26,5 +26,5 @@ let map_accum_left (f : 'a -> 'b -> 'a * 'c) (e : 'a) (xs : ' b list) : 'a * 'c 
     | [] -> (e, Bwd.to_list ys)
     | (x :: xs) ->
       let (e, y) = f e x
-      go e (Snoc (ys, y) xs
+      go e (Snoc (ys, y)) xs
   go e Emp xs

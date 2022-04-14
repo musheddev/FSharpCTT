@@ -2,15 +2,15 @@ module Core.Splice
 
 open Basis.Bwd
 open Cubical
-open BwdNotation
+open Basis.BwdNotation
 
 open CodeUnit
 
 module S = Syntax
-module D = Domain
+module D = DomainData
 module TB = TermBuilder
 
-type 'a t = D.env -> 'a TB.m * D.env
+type t<'a> = D.env<'a> -> 'a TB.m * D.env<'a>
 
 let foreign con k : _ t =
   fun env ->

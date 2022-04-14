@@ -1,8 +1,9 @@
 namespace Core
 open Basis
 open Cubical
+open Syntax
 
-module Syntax =
+module SyntaxPrinter =
 
   //type s = SyntaxData< 's >
 
@@ -19,7 +20,7 @@ module Syntax =
   let tp_abort = TpCofSplit []
 
   let pp_path fmt p =
-    Uuseg_string.pp_utf_8 fmt @@
+    fprintf fmt "%s" <|
     match p with
     | [] -> "."
     | _ -> String.concat "." p
@@ -105,7 +106,7 @@ module Syntax =
     | TpPrf t -> fprintf fmt "tp/prf[%a]" dump t
     | TpCofSplit _ -> fprintf fmt "<tp/cof/split>"
     | Sub _ -> fprintf fmt "<sub>"
-    | Pi (base, ident, fam) -> fprintf fmt "pi[%a, %a, %a]" dump_tp base Ident.pp ident dump_tp fam
+    | Pi (_base, ident, fam) -> fprintf fmt "pi[%a, %a, %a]" dump_tp _base Ident.pp ident dump_tp fam
     | Sg _ -> fprintf fmt "<sg>"
     | Signature fields -> fprintf fmt "tp/sig[%a]" dump_sign fields
     | Nat -> fprintf fmt "nat"
@@ -124,9 +125,9 @@ module Syntax =
     fprintf fmt "[%a, %a]" dump cof dump bdy
 
   module P =
-  struct
-    type tm = t (* anti-shadowing *)
-    include SyntaxPrecedence
+    open SyntaxPrecedence
+      (* anti-shadowing *)
+    type t = SyntaxPrecedence
 
     let passed = nonassoc 12
     let atom = nonassoc 11
@@ -147,7 +148,7 @@ module Syntax =
     let in_ = nonassoc 0
 
     (** assumes [Debug.is_debug_mode ()] = [false] *)
-    let classify_tm : tm -> t =
+    let classify_tm : SyntaxData.SyntaxData<_> -> t =
       function
       | Var _ | Global _ -> atom
       | Lam _ -> double_arrow
@@ -187,13 +188,13 @@ module Syntax =
       | LockedPrfIn _ -> juxtaposition
       | LockedPrfUnlock _ -> delimited
 
-    let classify_sub : sub -> t =
+    let classify_sub : SyntaxData.sub<_> -> t =
       function
       | SbI | Sb1 | SbP -> atom
       | SbC _ -> sub_compose
       | SbE _ -> sub_comma
 
-    let classify_tp : tp -> t =
+    let classify_tp : SyntaxData.tp<_> -> t =
       function
       | Univ | TpDim | TpCof | Nat | Circle -> atom
       | El _ -> passed
@@ -206,7 +207,7 @@ module Syntax =
       | Signature _ -> juxtaposition
       | TpESub _ -> substitution
       | TpLockedPrf _ -> juxtaposition
-  end
+  
 
   let pp_var env fmt ix =
     Uuseg_string.pp_utf_8 fmt @@ Pp.Env.var ix env

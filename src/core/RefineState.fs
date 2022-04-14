@@ -1,7 +1,7 @@
 module Core.RefineState
 open CodeUnit
 
-module IDMap = Map.Make (CodeUnitID)
+module IDMap = Map<CodeUnitID,CodeUnit>
 module D = Domain
 
 type t = { code_units : CodeUnit.t IDMap.t;

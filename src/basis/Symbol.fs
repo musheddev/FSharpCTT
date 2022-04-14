@@ -1,12 +1,12 @@
 namespace Basis
 
-type S = 
+type Symbol = 
 
-  val compare : S -> S -> int
-  val equal : S -> S -> bool
+  val compare : Symbol -> Symbol -> int
+  val equal : Symbol -> Symbol -> bool
 
   val pp : unit //pretty printer
-  val show : S -> string
+  val show : Symbol -> string
 
   // val serialize : S -> J.value
   // val deserialize : J.value -> S

@@ -51,7 +51,7 @@ module PersistentTable =
 
   let fold f t e = Map.fold f e t 
 
-  let merge (t0 : Map<'a,'b>) (t1 : Map<'a,'b>) = Map.fold (Map.add) t0 t1
+  let merge (t0 : Map<'a,'b>) (t1 : Map<'a,'b>) = Map.fold (fun m k v -> Map.add k v m) t0 t1
 
   let to_list t = Map.toList t
 

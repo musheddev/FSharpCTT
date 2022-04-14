@@ -13,8 +13,8 @@ with
   static member pp fmt =
     function
     | Anon -> fprintf fmt "<anon>"
-    | User parts -> Uuseg_string.pp_utf_8 fmt (qual_to_string parts)
-    | Machine str -> Uuseg_string.pp_utf_8 fmt str
+    | User parts -> fprintf fmt "%s" (Ident.qual_to_string parts)
+    | Machine str -> fprintf fmt "%s" str
 
   static member to_string =
     function

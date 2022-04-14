@@ -39,7 +39,7 @@ module Cof =
   let complexity_cof_f complexity_a =
     function
     | Eq _ -> 1
-    | Join l | Meet l -> List.foldBack (fun i c -> i + complexity_a c) l 1
+    | Join l | Meet l -> List.foldBack (fun c i -> i + complexity_a c) l 1
 
   let rec complexity_cof =
     function
@@ -50,11 +50,11 @@ module Cof =
     function
     | Eq (r1, r2) -> fprintf fmt "eq[%a;%a]" dump_r r1 dump_r r2
     | Join l ->
-      fprintf fmt "join[%a]"
-        (pp_print_list pp_sep:(fun fmt () -> pp_print_char fmt ';') dump_a) l
+      fprintf fmt "join[%A]" l
+        //(pp_print_list pp_sep:(fun fmt () -> pp_print_char fmt ';') dump_a) lS
     | Meet l ->
-      fprintf fmt "meet[%a]"
-        (pp_print_list pp_sep:(fun fmt () -> pp_print_char fmt ';') dump_a) l
+      fprintf fmt "meet[%A]" l
+        //(pp_print_list pp_sep:(fun fmt () -> pp_print_char fmt ';') dump_a) l
 
   let rec dump_cof dump_r dump_v fmt =
     function

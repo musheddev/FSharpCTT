@@ -1,5 +1,6 @@
 module Core.Monads
 
+
 open Basis
 open Cubical
 open Bwd
@@ -14,38 +15,32 @@ exception CCHM
 exception CJHM
 exception CFHM
 
-module CmpL =
-struct
-  type local =
-    {state : St.t;
-     cof_thy : CofThy.Disj.t}
-end
 
-module EvL =
-struct
-  type local =
-    {state : St.t;
-     cof_thy : CofThy.Disj.t;
-     env : D.env}
-end
+type CmpL =
+  { state : St.t;
+    cof_thy : CofThy.Disj.t}
 
-module ConvL =
-struct
-  type local =
-    {state : St.t;
-     veil : Veil.t;
-     cof_thy : CofThy.Alg.t;
-     size : int}
-end
 
-module QuL =
-struct
-  type local =
-    {state : St.t;
-     veil : Veil.t;
-     cof_thy : CofThy.Disj.t;
-     size : int}
-end
+
+type EvL =
+  { state : St.t;
+    cof_thy : CofThy.Disj.t;
+    env : D.env}
+
+
+type ConvL =
+  { state : St.t;
+    veil : Veil.t;
+    cof_thy : CofThy.Alg.t;
+    size : int}
+
+
+type QuL =
+  { state : St.t;
+    veil : Veil.t;
+    cof_thy : CofThy.Disj.t;
+    size : int}
+
 
 
 module CmpM =

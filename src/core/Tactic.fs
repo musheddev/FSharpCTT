@@ -10,7 +10,7 @@ module RM = RefineMonad
 module Sem = Semantics
 module Qu = Quote
 
-open Monad.Notation (RM)
+//open Monad.Notation (RM)
 
 let debug_tactic name =
   if String.length name = 0 then
@@ -18,33 +18,23 @@ let debug_tactic name =
   else
     Debug.print "Tactic: %s@." name
 
-module type Tactic =
-sig
-  type tac
-  val update_span : LexingUtil.span option -> tac -> tac
-  val whnf : style:Semantics.whnf_style -> tac -> tac
-end
 
-module Tp : sig
-  include Tactic
+type Tactic<'tac> =
+  abstract update_span : LexingUtil.span option -> 'tac -> 'tac
+  abstract whnf : style:Semantics.whnf_style -> 'tac -> 'tac
 
-  val rule : ?name:string -> S.tp RM.m -> tac
-  val virtual_rule : ?name:string -> S.tp RM.m -> tac
 
-  val run : tac -> S.tp RM.m
-  val run_virtual : tac -> S.tp RM.m
-  val map : (S.tp RM.m -> S.tp RM.m) -> tac -> tac
-end
-=
-struct
-  type tac =
-    | Virtual of string * S.tp RM.m
-    | General of string * S.tp RM.m
+type Tp =
+  | Virtual of string * S.tp RM.m
+  | General of string * S.tp RM.m
 
-  let rule ?(name = "") tac = General (name, tac)
-  let virtual_rule ?(name = "") tac = Virtual (name, tac)
+  with
+  static member rule : ?name:string -> S.tp RM.m -> TP =
+    fun name tactic -> General (name, tactic)
+  static member virtual_rule : ?name:string -> S.tp RM.m -> TP =
+    fun name tactic -> Virtual (name,tactic)
 
-  let run =
+  static member run : Tp -> S.tp RM.m =
     function
     | General (name, tac) ->
       debug_tactic name;
@@ -52,35 +42,63 @@ struct
     | Virtual _ ->
       RM.refine_err @@ RefineError.VirtualType
 
-  let run_virtual =
+  static member run_virtual : Tp -> S.tp RM.m =
     function
     | General (name, tac)
     | Virtual (name, tac) ->
       debug_tactic name;
       tac
 
-  let map f =
+  static member map : (S.tp RM.m -> S.tp RM.m) -> Tp -> Tp =
     function
     | General (name, tac) -> General (name, f tac)
     | Virtual (name, tac) -> Virtual (name, f tac)
 
-  let update_span loc =
-    map @@ RM.update_span loc
+  interface Tactic<Tp> with
+    member this.update_span loc =
+      Tp.map @@ RM.update_span loc
+    member this.whnf _ tac = tac
+  // type tac =
 
-  let whnf ~style:_ tac =
-    tac
-end
 
-module rec Var : sig
-  type tac
+  // member rule ?(name = "") tac = General (name, tac)
+  // let virtual_rule ?(name = "") tac = Virtual (name, tac)
+
+  // let run =
+  //   function
+  //   | General (name, tac) ->
+  //     debug_tactic name;
+  //     tac
+  //   | Virtual _ ->
+  //     RM.refine_err @@ RefineError.VirtualType
+
+  // let run_virtual =
+  //   function
+  //   | General (name, tac)
+  //   | Virtual (name, tac) ->
+  //     debug_tactic name;
+  //     tac
+
+  // let map f =
+  //   function
+  //   | General (name, tac) -> General (name, f tac)
+  //   | Virtual (name, tac) -> Virtual (name, f tac)
+
+  // let update_span loc =
+  //   map @@ RM.update_span loc
+
+  // let whnf ~style:_ tac =
+  //   tac
+
+type Var =
+  
 
   val prf : D.cof -> tac
   val con : tac -> D.con
   val syn : tac -> Syn.tac
   val abstract : ?ident:Ident.t -> D.tp -> (tac -> 'a RM.m) -> 'a RM.m
-end =
-struct
-  type tac = {tp : D.tp; con : D.con}
+
+  //type tac = {tp : D.tp; con : D.con}
 
   let prf phi = {tp = D.TpPrf phi; con = D.Prf}
   let con {tp = _; con} = con
@@ -93,22 +111,22 @@ struct
     fun ?(ident = `Anon) tp kont ->
     RM.abstract ident tp @@ fun (con : D.con) ->
     kont @@ {tp; con}
-end
 
-and Chk : sig
-  include Tactic
+
+and Chk =
+  //include Tactic
 
   val rule : ?name:string -> (D.tp -> S.t RM.m) -> tac
   val brule : ?name:string -> (D.tp * D.cof * D.tm_clo -> S.t RM.m) -> tac
   val run : tac -> D.tp -> S.t RM.m
   val brun : tac -> D.tp * D.cof * D.tm_clo -> S.t RM.m
 
-  val syn : Syn.tac -> tac
-end =
-struct
-  type tac =
-    | Chk of string * (D.tp -> S.t RM.m)
-    | BChk of string * (D.tp * D.cof * D.tm_clo -> S.t RM.m)
+  abstract syn : Syn.tac -> tac
+
+
+  //type tac =
+  //  | Chk of string * (D.tp -> S.t RM.m)
+  //  | BChk of string * (D.tp * D.cof * D.tm_clo -> S.t RM.m)
 
   let run =
     function
@@ -161,16 +179,15 @@ struct
     function
     | `Done -> brun tac (tp, phi, clo)
     | `Reduce tp -> brun tac (tp, phi, clo)
-end
 
-and Syn : sig
-  include Tactic
+
+and Syn =
+  //include Tactic
   val rule : ?name:string -> (S.t * D.tp) RM.m -> tac
   val run : tac -> (S.t * D.tp) RM.m
   val ann : Chk.tac -> Tp.tac -> tac
-end =
-struct
-  type tac = string * (S.t * D.tp) RM.m
+
+  //type tac = string * (S.t * D.tp) RM.m
 
   let rule ?(name = "") tac = (name, tac)
   let run (name, tac) =

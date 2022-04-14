@@ -31,21 +31,23 @@
     <Compile Include="cubical\Dim.fs" />
     <Compile Include="cubical\Cof.fs" />
     <Compile Include="cubical\CofThy.fs" />
+    <Compile Include="core\Debug.fs" />
     <Compile Include="core\Ident.fs" />
+   
+    <Compile Include="core\Global.fs" />
     <Compile Include="core\SyntaxData.fs" />
-
+    <Compile Include="core\SyntaxPrecedence.fs" />
     <Compile Include="core\Syntax.fs" />
-
+    <Compile Include="core\DomainData.fs" />
     <Compile Include="core\Domain.fs" />
+    
 
     <Compile Include="core\CodeUnit.fs" />
    
 
     <Compile Include="core\Veil.fs" />
 
-    <Compile Include="core\Tactic.fs" />
-
-    <Compile Include="core\SyntaxPrecedence.fs" />
+ 
 
     <Compile Include="core\TermBuilder.fs" />
 
@@ -57,9 +59,9 @@
 
     <Compile Include="core\RefineState.fs" />
 
-    <Compile Include="core\Refiner.fs" />
+    
 
-    <Compile Include="core\RefineMonad.fs" />
+    
     <Compile Include="core\RefineErrorData.fs" />
 
     <Compile Include="core\RefineError.fs" />
@@ -71,13 +73,16 @@
     <Compile Include="core\Namespace.fs" />
 
     <Compile Include="core\Monads.fs" />
+    <Compile Include="core\Conversion.fs" />
+    <Compile Include="core\RefineMonad.fs" />
 
     <Compile Include="core\Log.fs" />
-    <Compile Include="core\DomainData.fs" />
+    
 
-    <Compile Include="core\Debug.fs" />
+   
+    <Compile Include="core\Tactic.fs" />
+    <Compile Include="core\Refiner.fs" />
 
-    <Compile Include="core\Conversion.fs" />
 
 
     <Compile Include="frontend\Tactics.fs" />

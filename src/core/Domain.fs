@@ -1,45 +1,46 @@
-module Core.Domaain
+module Core.Domain
 
 
 open Basis
 open Cubical
 
+open Core.DomainData
 
 
 let const_tp_clo tp =
-  Clo (S.TpVar 0, {tpenv = Snoc (Emp, tp); conenv = Emp})
+  Closure (Syntax.TpVar 0, {tpenv = Snoc (Emp, tp); conenv = Emp})
 
 let const_tm_clo con =
-  Clo (S.Var 0, {tpenv = Emp; conenv = Snoc (Emp, con)})
+  Closure (Syntax.Var 0, {tpenv = Emp; conenv = Snoc (Emp, con)})
 
 let push frm (hd, sp) =
   hd, sp @ [frm]
 
 let mk_var tp lvl =
-  Cut {tp; cut = Var lvl, []}
+  Cut (tp, (Var lvl, []))
 
 let un_lam con =
   (* y, x |= y(x) *)
-  Clo (S.Ap (S.Var 1, S.Var 0), {tpenv = Emp; conenv = Snoc (Emp, con)})
+  Closure (Syntax.Ap (Syntax.Var 1, Syntax.Var 0), {tpenv = Emp; conenv = Snoc (Emp, con)})
 
 let compose f g =
-  Lam (`Anon, Clo (S.Ap (S.Var 2, S.Ap (S.Var 1, S.Var 0)), {tpenv = Emp; conenv = Snoc (Snoc (Emp, f), g)}))
+  Lam (Anon, Closure (Syntax.Ap (Syntax.Var 2, Syntax.Ap (Syntax.Var 1, Syntax.Var 0)), {tpenv = Emp; conenv = Snoc (Snoc (Emp, f), g)}))
 
 let apply_to x =
-  Clo (S.Ap (S.Var 0, S.Var 1), {tpenv = Emp; conenv = Snoc (Emp, x)})
+  Closure(Syntax.Ap (Syntax.Var 0, Syntax.Var 1), {tpenv = Emp; conenv = Snoc (Emp, x)})
 
-let fst = Lam (`Anon, Clo (S.Fst (S.Var 0), {tpenv = Emp; conenv = Emp}))
-let snd = Lam (`Anon, Clo (S.Snd (S.Var 0), {tpenv = Emp; conenv = Emp}))
+let fst = Lam (Anon, Closure(Syntax.Fst (Syntax.Var 0), {tpenv = Emp; conenv = Emp}))
+let snd = Lam (Anon, Closure(Syntax.Snd (Syntax.Var 0), {tpenv = Emp; conenv = Emp}))
 
-let proj lbl = Lam (`Anon, Clo (S.Proj (S.Var 0, lbl), {tpenv = Emp; conenv = Emp}))
-let el_out = Lam (`Anon, Clo (S.ElOut (S.Var 0), {tpenv = Emp; conenv = Emp}))
+let proj lbl = Lam (Anon, Closure(Syntax.Proj (Syntax.Var 0, lbl), {tpenv = Emp; conenv = Emp}))
+let el_out = Lam (Anon, Closure(Syntax.ElOut (Syntax.Var 0), {tpenv = Emp; conenv = Emp}))
 
 let tm_abort = Split []
 let tp_abort = TpSplit []
 
 let sign_lbls =
   function
-  | Field (lbl, _, Clo (sign, _)) -> lbl :: (List.map (fun (lbl, _) -> lbl) sign)
+  | Field (lbl, _, Closure(_sign, _)) -> lbl :: (List.map (fun (lbl, _) -> lbl) _sign)
   | Empty -> []
 
 let dim_to_con =
@@ -47,16 +48,16 @@ let dim_to_con =
   | Dim.Dim0 -> Dim0
   | Dim.Dim1 -> Dim1
   | Dim.DimVar lvl ->
-    Cut {tp = TpDim; cut = Var lvl, []}
+    Cut (TpDim, (Var lvl, []))
   | Dim.DimProbe sym ->
     DimProbe sym
 
 let rec cof_to_con =
   function
-  | Cof.Cof (Cof.Eq (r, s)) -> Cof (Cof.Eq (dim_to_con r, dim_to_con s))
-  | Cof.Cof (Cof.Join phis) -> Cof (Cof.Join (List.map cof_to_con phis))
-  | Cof.Cof (Cof.Meet phis) -> Cof (Cof.Meet (List.map cof_to_con phis))
-  | Cof.Var lvl -> Cut {tp = TpCof; cut = Var lvl, []}
+  | Cof.Cof (Cof_f.Eq (r, s)) -> Cof (Cof_f.Eq (dim_to_con r, dim_to_con s))
+  | Cof.Cof (Cof_f.Join phis) -> Cof (Cof_f.Join (List.map cof_to_con phis))
+  | Cof.Cof (Cof_f.Meet phis) -> Cof (Cof_f.Meet (List.map cof_to_con phis))
+  | Cof.Var lvl -> Cut (TpCof, (Var lvl, []))
 
 let pp_lsq fmt () = fprintf fmt "["
 let pp_rsq fmt () = fprintf fmt "]"
@@ -68,7 +69,7 @@ let pp_list_group ~left ~right ~sep pp fmt xs =
     right ()
 
 let pp_path fmt p =
-  Uuseg_string.pp_utf_8 fmt @@
+  fprintf fmt "%s" <|
   match p with
   | [] -> "."
   | _ -> String.concat "." p
@@ -122,25 +123,25 @@ and pp_dim : dim Pp.printer =
 
 and pp_clo : tm_clo Pp.printer =
   let sep fmt () = fprintf fmt "," in
-  fun fmt (Clo (tm, {tpenv; conenv})) ->
+  fun fmt (Closure(tm, {tpenv; conenv})) ->
     fprintf fmt "clo[%a ; [%a ; %a]]"
-      S.dump tm
+      Syntax.dump tm
       (pp_list_group ~left:pp_lsq ~right:pp_rsq ~sep pp_tp) (Bwd.Bwd.to_list tpenv)
       (pp_list_group ~left:pp_lsq ~right:pp_rsq ~sep pp_con) (Bwd.Bwd.to_list conenv)
 
 and pp_tp_clo : tp_clo Pp.printer =
   let sep fmt () = fprintf fmt "," in
-  fun fmt (Clo (tp, {tpenv; conenv})) ->
+  fun fmt (Closure(tp, {tpenv; conenv})) ->
     fprintf fmt "tpclo[%a ; [%a ; %a]]"
-      S.dump_tp tp
+      Syntax.dump_tp tp
       (pp_list_group ~left:pp_lsq ~right:pp_rsq ~sep pp_tp) (Bwd.Bwd.to_list tpenv)
       (pp_list_group ~left:pp_lsq ~right:pp_rsq ~sep pp_con) (Bwd.Bwd.to_list conenv)
 
-and pp_sign_clo : (S.sign clo) Pp.printer =
+and pp_sign_clo : (Syntax.sign clo) Pp.printer =
   let sep fmt () = fprintf fmt "," in
-  fun fmt (Clo (sign, {tpenv; conenv})) ->
+  fun fmt (Closure(sign, {tpenv; conenv})) ->
     fprintf fmt "tpclo[%a ; [%a ; %a]]"
-      S.dump_sign sign
+      Syntax.dump_sign sign
       (pp_list_group ~left:pp_lsq ~right:pp_rsq ~sep pp_tp) (Bwd.Bwd.to_list tpenv)
       (pp_list_group ~left:pp_lsq ~right:pp_rsq ~sep pp_con) (Bwd.Bwd.to_list conenv)
 

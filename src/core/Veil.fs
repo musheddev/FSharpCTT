@@ -3,24 +3,26 @@ module Core.Veil
 open Basis 
 
 //module Global = CodeUnit.Global
-//module SymbolMap = SymbolMap.Make (Global)
-
-type policy =  | Translucent | Transparent
 
 
-type Policy = {Default : policy; Custom : policy SymbolMap.t}
+type PolicyType =  | Translucent | Transparent
+type SymbolMap = Map<Global,PolicyType>
 
-let policy : CodeUnit.Global -> Policy -> policy =
+type Policy = {Default : PolicyType; Custom : SymbolMap}
+
+let _SymbolMap : SymbolMap = Map.empty
+
+let policy : Global -> Policy -> PolicyType =
   fun sym veil ->
-  match SymbolMap.find_opt sym veil.custom with
+  match _SymbolMap.TryFind(sym) with //veil.custom with
   | Some p -> p
   | None -> veil.Default
 
-let unfold syms veil =
+let unfold (syms : list<Global>, veil) =
   {veil with
-   Custom =
-     List.foldBack (fun m sym -> SymbolMap.add sym Transparent m) syms veil.custom}
+    Custom =
+      List.foldBack (fun sym m -> Map.add sym Transparent m) syms veil.Custom}
 
-let Const : policy -> Policy =
+let Const : PolicyType -> Policy =
   fun p ->
-  {Default = p; Custom = SymbolMap.empty}
+  {Default = p; Custom = Map.empty}

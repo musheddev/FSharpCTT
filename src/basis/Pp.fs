@@ -4,6 +4,7 @@ namespace Basis
 
 open Bwd
 open BwdNotation
+open System
 
 module Env =
 
@@ -13,7 +14,7 @@ module Env =
     let formatted = sprintf "%i" n 
     let lookup : int -> string = List.nth ["₀";"₁";"₂";"₃";"₄";"₅";"₆";"₇";"₈";"₉"]
     String.concat "" 
-    <| List.init (String.length formatted) (fun n -> lookup (Char.code (String.get formatted n) - Char.code '0'))
+    <| List.init (String.length formatted) (fun n -> lookup (int (Char.GetNumericValue (formatted.[n]) - Char.GetNumericValue '0')))
 
   let rec rename xs x i =
     let suffix = nat_to_suffix i 
@@ -54,6 +55,7 @@ module Env =
   let names (env : string bwd) : string list =
     env <>> []
 
-
-let pp_sep_list sep pp_elem fmt xs =
-  pp_print_list ~pp_sep:(fun fmt () -> pp_print_string fmt sep) pp_elem fmt xs
+module Pp =
+  let pp_sep_list sep pp_elem fmt xs =
+    List.iteri (fun elem i -> pp_elem fmt elem; if (i+1) < List.length xs then fprintf fmt "%s" sep) xs
+    //fprintf fmt "%s" ~pp_sep:(fun fmt () -> pp_print_string fmt sep) pp_elem fmt xs

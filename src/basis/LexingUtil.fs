@@ -1,26 +1,32 @@
 namespace Basis
-open Lexing
+//open Lexing
+open System
+open System.IO
 
-type span =
-  {start : Lexing.position;
-   stop : Lexing.position}
+module LexingUtil =
 
-let pp_span : span Pp.printer =
-  fun fmt span ->
-  fprintf fmt "%a:%i.%i-%i.%i"
-    (* HACK: We use the basename, rather than the full path here
-       to avoid issues with the test suite. This is bad, and should
-       be changed once more thought is put into how we want to
-       handle fancier imports/project structures. *)
-    Uuseg_string.pp_utf_8 (Filename.basename span.start.pos_fname)
-    span.start.pos_lnum
-    (span.start.pos_cnum - span.start.pos_bol)
-    span.stop.pos_lnum
-    (span.stop.pos_cnum - span.stop.pos_bol)
+  type span =
+    {start : int64 * int64// Lexing.position;
+     stop : int64 * int64 //Lexing.position
+     file_name : string
+    }
 
-let last_token lexbuf = 
-  let tok = lexeme lexbuf in
-  if tok = "" then None else Some tok
+  let pp_span =
+    fun fmt span ->
+      fprintf fmt "%s:%i.%i-%i.%i"
+        (* HACK: We use the basename, rather than the full path here
+          to avoid issues with the test suite. This is bad, and should
+          be changed once more thought is put into how we want to
+          handle fancier imports/project structures. *)
+        (Path.GetFileName span.file_name)
+        (fst span.start)
+        (snd span.start)
+        (fst span.stop)
+        (snd span.stop)
 
-let current_span lexbuf = 
-  {start = lexbuf.lex_start_p; stop = lexbuf.lex_curr_p}
+  let last_token (lexbuf : Stream) = 
+    let tok = lexeme lexbuf in
+    if tok = "" then None else Some tok
+
+  let current_span (lexbuf : Stream) = 
+    {start = lexbuf.lex_start_p; stop = lexbuf.lex_curr_p}
