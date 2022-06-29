@@ -5,13 +5,15 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>62;</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
 
     <Compile Include="basis\Void.fs" />
 
     <Compile Include="basis\Bwd.fs" />
-
-    <Compile Include="basis\Symbol.fs" />
 
     <Compile Include="basis\PpExn.fs" />
 
@@ -29,8 +31,8 @@
 
     <Compile Include="cubical\DimProbe.fs" />
     <Compile Include="cubical\Dim.fs" />
-    <Compile Include="cubical\Cof.fs" />
-    <Compile Include="cubical\CofThy.fs" />
+    <Compile Include="cubical\Cofibration.fs" />
+    <Compile Include="cubical\CofibrationsTheory.fs" />
     <Compile Include="core\Debug.fs" />
     <Compile Include="core\Ident.fs" />
    
@@ -100,6 +102,10 @@
 
   <ItemGroup>
     <Folder Include="bin\Debug\net5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharpPlus" Version="1.2.4" />
   </ItemGroup>
 
 </Project>

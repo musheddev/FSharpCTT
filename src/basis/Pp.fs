@@ -56,6 +56,6 @@ module Env =
     env <>> []
 
 module Pp =
-  let pp_sep_list sep pp_elem fmt xs =
-    List.iteri (fun elem i -> pp_elem fmt elem; if (i+1) < List.length xs then fprintf fmt "%s" sep) xs
+  let pp_sep_list sep pp_elem (fmt : #IO.TextWriter) (xs :list<'a>) =
+    List.iteri (fun i elem -> pp_elem fmt elem; if (i+1) < List.length xs then fprintf fmt "%s" sep) xs
     //fprintf fmt "%s" ~pp_sep:(fun fmt () -> pp_print_string fmt sep) pp_elem fmt xs

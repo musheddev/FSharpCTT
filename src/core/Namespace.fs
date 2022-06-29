@@ -12,7 +12,7 @@ let add ident sym ns =
 (* XXX No [failwith]! *)
 let nest pp_a modifier imported ns =
   let report_duplicate ~rev_path _old _new =
-    failwith @@ "Duplicate identifiers for " ^ Ident.to_string (`User (List.rev rev_path))
+    failwith <| "Duplicate identifiers for " ^ Ident.to_string (`User (List.rev rev_path))
   in
   let hooks (`Print lbl) ~rev_prefix t =
     let lbl = Option.fold ~none:"?" ~some:(fun lbl -> "?" ^ lbl) lbl in
@@ -30,7 +30,7 @@ let nest pp_a modifier imported ns =
   | Ok transformed_imported ->
     Trie.union report_duplicate ns transformed_imported
   | Error (`BindingNotFound path) ->
-    failwith @@ "No identifiers with the prefix " ^ Ident.to_string (`User path)
+    failwith <| "No identifiers with the prefix " ^ Ident.to_string (`User path)
 
 let find (ident : Ident.t) ns =
   match ident with

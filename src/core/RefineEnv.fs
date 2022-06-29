@@ -82,7 +82,7 @@ let resolve_local (ident : Ident.t) env =
         | _ -> go (i + 1) xs
       end
   in
-  match go 0 @@ env.locals with
+  match go 0 <| env.locals with
   | i -> Some i
   | exception E -> None
 
@@ -92,7 +92,7 @@ let restrict phis env =
 
 let append_con ident con tp env =
   {env with
-   pp = snd @@ Pp.Env.bind env.pp (Ident.to_string_opt ident);
+   pp = snd <| Pp.Env.bind env.pp (Ident.to_string_opt ident);
    locals = env.locals <>< [{contents = tp, con; ident}];
    cof_thy =
      match tp with
@@ -102,7 +102,7 @@ let append_con ident con tp env =
 let sem_env (env : t) : D.env =
   {tpenv = Emp;
    conenv =
-     env.locals |> Bwd.map @@ fun cell ->
+     env.locals |> Bwd.map <| fun cell ->
      let _, con = Cell.contents cell in
      con}
 

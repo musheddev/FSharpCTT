@@ -2,11 +2,11 @@ namespace Core
 open Basis
 open Cubical
 
-module Syntax =
+module SyntaxData =
 
   type SyntaxData<'s> =
     | Var of int
-    | Global of Global.Global
+    | Global of Global
     | Let of SyntaxData<'s> * Ident * SyntaxData<'s>
     | Ann of SyntaxData<'s> * tp<'s>
 

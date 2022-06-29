@@ -2,7 +2,7 @@ module Core.DomainData
 open Basis
 open Cubical
 open Bwd
-open Core.Syntax
+
 
 type dim = Dim
 type cof = (dim, int) Cof
@@ -44,9 +44,9 @@ type env<'a> = {tpenv : tp<'a> bwd; conenv: con<'a> bwd}
 
 (** A {i closure} combines a semantic environment with a syntactic object binding an additional variable. *)
 and 'a clo = Closure of ('a * env<'a>)
-and 'a tp_clo = clo<Syntax.tp<'a>>
-and 'a tm_clo = clo<Syntax.SyntaxData<'a>>
-and 'a sign_clo = clo<Syntax.sign<'a>>
+and 'a tp_clo = clo<SyntaxData.tp<'a>>
+and 'a tm_clo = clo<SyntaxData.SyntaxData<'a>>
+and 'a sign_clo = clo<SyntaxData.sign<'a>>
 
 
 and [<RequireQualifiedAccess>] FHCom =
@@ -116,7 +116,7 @@ and tp<'a> =
   | TpLockedPrf of cof
 
 and sign<'a> =
-  | Field of string list * tp<'a> * clo<Syntax.sign<'a>>
+  | Field of string list * tp<'a> * clo<SyntaxData.sign<'a>>
   | Empty
 
 (** A head is a variable (e.g. {!constructor:Global}, {!constructor:Var}), or it is some kind of unstable elimination form ({!constructor:Coe}, {!constructor:UnstableCut}). The geometry of {!type:cut}, {!type:hd}, {!type:unstable_frm} enables a very direct way to re-reduce a complex cut to whnf by following the unstable nodes to the root. *)

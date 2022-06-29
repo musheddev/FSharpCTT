@@ -1,7 +1,7 @@
-open CodeUnit
+module Refine
 
-module D = Domain
-module S = Syntax
+module D = DomainData
+module S = SyntaxData
 module St = RefineState
 module Env = RefineEnv
 module Err = RefineError
@@ -15,21 +15,21 @@ open Monad.Notation (Monads.RefineM)
 
 let refine_err err =
   let* env = read in
-  throw @@ Err.RefineError (err, Env.location env)
+  throw <| Err.RefineError (err, Env.location env)
 
 let resolve id =
   let* env = read in
   match Env.resolve_local id env with
-  | Some ix -> ret @@ `Local ix
+  | Some ix -> ret <| `Local ix
   | None ->
     let* st = get in
     match St.resolve_global (Env.current_unit_id env) id st with
-    | Some sym -> ret @@ `Global sym
+    | Some sym -> ret <| `Global sym
     | None -> ret `Unbound
 
 let get_current_unit_id =
   let* env = read in
-  ret @@ Env.current_unit_id env
+  ret <| Env.current_unit_id env
 
 let add_global id tp con =
   let* st = get in
@@ -63,12 +63,12 @@ let with_code_unit lib unit_id (action : 'a m) =
 
 let get_current_lib =
   let* env = read in
-  ret @@ Env.current_lib env
+  ret <| Env.current_lib env
 
 let get_current_unit =
   let* st = get in
   let* current_unit_id = get_current_unit_id in
-  ret @@ St.get_unit current_unit_id st
+  ret <| St.get_unit current_unit_id st
 
 let add_import modifier code_unit =
   let* current_unit_id = get_current_unit_id in
@@ -83,35 +83,35 @@ let is_imported path =
   St.is_imported path st
 
 let quote_con tp con =
-  lift_qu @@ Qu.quote_con tp con
+  lift_qu <| Qu.quote_con tp con
 
 let quote_tp tp =
-  lift_qu @@ Qu.quote_tp tp
+  lift_qu <| Qu.quote_tp tp
 
 let quote_sign sign =
-  lift_qu @@ Qu.quote_sign sign
+  lift_qu <| Qu.quote_sign sign
 
 let quote_cut cut =
-  lift_qu @@ Qu.quote_cut cut
+  lift_qu <| Qu.quote_cut cut
 
 let quote_cof cof =
-  lift_qu @@ Qu.quote_cof cof
+  lift_qu <| Qu.quote_cof cof
 
 let quote_dim con =
-  lift_qu @@ Qu.quote_dim con
+  lift_qu <| Qu.quote_dim con
 
 
 (* This is extremely low-ch'i.
  * There should be a generic error-trapping function in src/basis/Monad. *)
 let trap_conversion_err (m : unit m) : [`Ok | `Err of Conversion.Error.t] m =
   trap m |>> function
-  | Error (Conversion.ConversionError err) -> ret @@ `Err err
+  | Error (Conversion.ConversionError err) -> ret <| `Err err
   | Error exn -> throw exn
   | Ok _ -> ret `Ok
 
 
 let equate tp l r =
-  trap_conversion_err @@ lift_conv_ @@ Conv.equate_con tp l r |>>
+  trap_conversion_err <| lift_conv_ <| Conv.equate_con tp l r |>>
   function
   | `Ok -> ret ()
   | `Err err ->
@@ -119,42 +119,42 @@ let equate tp l r =
     let* ttp = quote_tp tp in
     let* tl = quote_con tp l in
     let* tr = quote_con tp r in
-    refine_err @@ Err.ExpectedEqual (Env.pp_env env, ttp, tl, tr, err)
+    refine_err <| Err.ExpectedEqual (Env.pp_env env, ttp, tl, tr, err)
 
 let equate_tp tp tp' =
-  trap_conversion_err @@ lift_conv_ @@ Conv.equate_tp tp tp' |>>
+  trap_conversion_err <| lift_conv_ <| Conv.equate_tp tp tp' |>>
   function
   | `Ok -> ret ()
   | `Err err ->
     let* env = read in
     let* ttp = quote_tp tp in
     let* ttp' = quote_tp tp' in
-    refine_err @@ Err.ExpectedEqualTypes (Env.pp_env env, ttp, ttp', err)
+    refine_err <| Err.ExpectedEqualTypes (Env.pp_env env, ttp, ttp', err)
 
 
 let with_pp k =
   let* env = read in
-  k @@ Env.pp_env env
+  k <| Env.pp_env env
 
 let expected_connective conn tp =
-  with_pp @@ fun ppenv ->
+  with_pp <| fun ppenv ->
   let* ttp = quote_tp tp in
-  refine_err @@ Err.ExpectedConnective (conn, ppenv, ttp)
+  refine_err <| Err.ExpectedConnective (conn, ppenv, ttp)
 
 let expected_field sign con lbl =
-  with_pp @@ fun ppenv ->
+  with_pp <| fun ppenv ->
   let* tsign = quote_sign sign in
-  refine_err @@ Err.ExpectedField (ppenv, tsign, con, lbl)
+  refine_err <| Err.ExpectedField (ppenv, tsign, con, lbl)
 
 let field_names_mismatch ~expected ~actual =
-  refine_err @@ Err.FieldNameMismatches (expected, actual)
+  refine_err <| Err.FieldNameMismatches (expected, actual)
 
 let abstract nm tp k =
   let rho env =
-    let con = D.mk_var tp @@ Env.size env in
+    let con = D.mk_var tp <| Env.size env in
     Env.append_con nm con tp env
   in
-  scope rho @@
+  scope rho <|
   k @<< get_local 0
 
 let problem =
@@ -162,8 +162,8 @@ let problem =
   Env.problem env
 
 let push_problem lbl =
-  scope @@
+  scope <|
   Env.push_problem lbl
 
 let update_span loc =
-  scope @@ Env.set_location loc
+  scope <| Env.set_location loc

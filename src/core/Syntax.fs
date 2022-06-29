@@ -1,7 +1,9 @@
 namespace Core
 open Basis
 open Cubical
-open Syntax
+open SyntaxData
+open Cubical.Cof
+
 
 module SyntaxPrinter =
 
@@ -210,7 +212,7 @@ module SyntaxPrinter =
   
 
   let pp_var env fmt ix =
-    Uuseg_string.pp_utf_8 fmt @@ Pp.Env.var ix env
+    Uuseg_string.pp_utf_8 fmt <| Pp.Env.var ix env
 
   let pp_bracketed pp fmt a =
     fprintf fmt "@[<hv>[ %a@ ]@]"
@@ -228,13 +230,13 @@ module SyntaxPrinter =
       pp a
 
   let pp_braced_cond classify plain_pp penv fmt tm =
-    if P.parens penv @@ classify tm then
+    if P.parens penv <| classify tm then
       pp_braced (plain_pp penv) fmt tm
     else
       plain_pp penv fmt tm
 
   let ppenv_bind env ident =
-    Pp.Env.bind env @@ Ident.to_string_opt ident
+    Pp.Env.bind env <| Ident.to_string_opt ident
 
   let rec pp_fields pp_field env fmt  =
     function
@@ -246,7 +248,7 @@ module SyntaxPrinter =
         (pp_fields pp_field env) fields
 
   let rec pp env =
-    pp_braced_cond P.classify_tm @@ fun penv fmt ->
+    pp_braced_cond P.classify_tm <| fun penv fmt ->
     function
     | Lam _ as tm ->
       fprintf fmt "@[%a@]"
@@ -474,7 +476,7 @@ module SyntaxPrinter =
         (pp env P.(right_of in_)) bdy
 
   and pp_sub env =
-    pp_braced_cond P.classify_sub @@ fun _ fmt ->
+    pp_braced_cond P.classify_sub <| fun _ fmt ->
     function
     | Sb1 ->
       Uuseg_string.pp_utf_8 fmt "ε"
@@ -495,7 +497,7 @@ module SyntaxPrinter =
   and pp_sign env fmt (sign : sign) : unit = pp_fields pp_tp env fmt sign
 
   and pp_tp env =
-    pp_braced_cond P.classify_tp @@ fun penv fmt ->
+    pp_braced_cond P.classify_tp <| fun penv fmt ->
     function
     | TpCofSplit branches ->
       let pp_sep fmt () = fprintf fmt "@ | " in
@@ -574,7 +576,7 @@ module SyntaxPrinter =
       fprintf fmt "%a %a"
         Uuseg_string.pp_utf_8 x
         (pp_lambdas envx) tm
-    | (SubIn tm | SubOut tm | ElIn tm | ElOut tm) when not @@ Debug.is_debug_mode () ->
+    | (SubIn tm | SubOut tm | ElIn tm | ElOut tm) when not <| Debug.is_debug_mode () ->
       pp_lambdas env fmt tm
     | _ ->
       fprintf fmt "=>@ @[%a@]"

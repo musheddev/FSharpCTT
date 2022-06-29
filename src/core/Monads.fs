@@ -1,14 +1,15 @@
 module Core.Monads
 
-
+open FSharpPlus
+open FSharpPlus.Data
 open Basis
 open Cubical
 open Bwd
 
 open CodeUnit
 
-module D = Domain
-module S = Syntax
+module D = DomainData
+module S = SyntaxData
 module St = RefineState
 
 exception CCHM
@@ -18,53 +19,56 @@ exception CFHM
 
 type CmpL =
   { state : St.t;
-    cof_thy : CofThy.Disj.t}
+    cof_thy : disj_thy}
 
 
 
 type EvL =
   { state : St.t;
-    cof_thy : CofThy.Disj.t;
+    cof_thy : disj_thy;
     env : D.env}
 
 
 type ConvL =
   { state : St.t;
     veil : Veil.t;
-    cof_thy : CofThy.Alg.t;
+    cof_thy : alg_thy;
     size : int}
 
 
 type QuL =
   { state : St.t;
     veil : Veil.t;
-    cof_thy : CofThy.Disj.t;
+    cof_thy : disj_thy;
     size : int}
 
 
 
 module CmpM =
-struct
-  module M = Monad.MonadReaderResult (CmpL)
-  open Monad.Notation (M)
 
-  let read_global =
-    let+ {state; _} = M.read in
-    state
+  //module M = Monad.MonadReaderResult (CmpL)
+  //open Monad.Notation (M)
 
-  let lift_ev env m CmpL.{state; cof_thy} =
-    m EvL.{state; cof_thy; env}
+  let read_global : Reader<CmpL,St.t> = monad' {
+      let! x = Reader.ask
+      return x.state
+  }
 
-  let read_cof_thy =
-    let+ {cof_thy; _} = M.read in
-    cof_thy
+  let lift_ev env m (cmpL :CmpL) =
+    m {state = cmpL.state; cof_thy = cmpL.cof_thy; env = env}
+
+  let read_cof_thy : Reader<CmpL,> = monad' {
+      let! x = Reader.ask
+      return x.cof_thy
+  }
+
 
   let test_sequent cx phi =
     let+ {cof_thy; _} = M.read in
     CofThy.Disj.test_sequent cof_thy cx phi
 
   let restore_cof_thy cof_thy =
-    M.scope @@ fun local ->
+    Reader.scope <| fun local ->
     {local with cof_thy}
 
   let abort_if_inconsistent : 'a m -> 'a m -> 'a m =
@@ -108,7 +112,7 @@ struct
     M.scope (fun local -> {local with env = {local.env with conenv = Emp}}) k
 
   let append cells =
-    M.scope @@ fun local ->
+    M.scope <| fun local ->
     let open BwdNotation in
     {local with env = {local.env with conenv = local.env.conenv <>< cells}}
 
@@ -142,11 +146,11 @@ struct
     size
 
   let binder i =
-    M.scope @@ fun local ->
+    M.scope <| fun local ->
     {local with size = i + local.size}
 
   let globally m =
-    m |> M.scope @@ fun local ->
+    m |> M.scope <| fun local ->
     {local with size = 0}
 
   let abort_if_inconsistent : 'a m -> 'a m -> 'a m =
@@ -167,24 +171,24 @@ struct
     let* {cof_thy; _} = M.read in
     CofThy.Alg.left_invert_under_cofs
       ~zero:(M.ret ()) ~seq:MU.iter
-      cof_thy phis @@ fun thy ->
+      cof_thy phis <| fun thy ->
     replace_env thy m
 
   let top_var tp =
     let+ n = read_local in
-    D.mk_var tp @@ n - 1
+    D.mk_var tp <| n - 1
 
   let bind'_var tp m =
-    binder 1 @@
+    binder 1 <|
     let* var = top_var tp in
-    m var @@
+    m var <|
     match tp with
     | D.TpPrf phi -> [phi]
     | _ -> []
 
   let bind_var_ tp m =
-    bind'_var tp @@ fun var phis ->
-    restrict_ phis @@ m var
+    bind'_var tp <| fun var phis ->
+    restrict_ phis <| m var
 
   include ConvL
   include M
@@ -216,29 +220,29 @@ struct
     m {state; cof_thy}
 
   let globally m =
-    m |> M.scope @@ fun local ->
+    m |> M.scope <| fun local ->
     {local with size = 0}
 
   let replace_env cof_thy =
-    M.scope @@ fun local -> {local with cof_thy}
+    M.scope <| fun local -> {local with cof_thy}
 
   let restrict phis m =
     let* {cof_thy; _} = M.read in
     replace_env (CofThy.Disj.assume cof_thy phis) m
 
   let binder i =
-    M.scope @@ fun local ->
+    M.scope <| fun local ->
     {local with size = i + local.size}
 
   let top_var tp =
     let+ n = read_local in
-    D.mk_var tp @@ n - 1
+    D.mk_var tp <| n - 1
 
   let bind_var tp m =
-    binder 1 @@
+    binder 1 <|
     let* var = top_var tp in
     match tp with
-    | D.TpPrf phi -> restrict [phi] @@ m var
+    | D.TpPrf phi -> restrict [phi] <| m var
     | _ -> m var
 
   let abort_if_inconsistent : 'a m -> 'a m -> 'a m =
@@ -261,10 +265,10 @@ struct
   include M
 
   let globally m =
-    m |> scope @@ fun env ->
-    Env.set_location (Env.location env) @@
-    Env.set_veil (Env.get_veil env) @@
-    Env.set_current_unit_id (Env.current_unit_id env) @@
+    m |> scope <| fun env ->
+    Env.set_location (Env.location env) <|
+    Env.set_veil (Env.get_veil env) <|
+    Env.set_current_unit_id (Env.current_unit_id env) <|
     Env.init (Env.current_lib env)
 
   let emit ?(lvl = `Info) loc pp a : unit m =
@@ -277,11 +281,11 @@ struct
         Ok (), st
 
   let veil v =
-    M.scope @@ fun env ->
+    M.scope <| fun env ->
     Env.set_veil v env
 
   let restrict phis =
-    M.scope @@ fun env ->
+    M.scope <| fun env ->
     Env.restrict phis env
 
 
@@ -294,7 +298,7 @@ struct
       match
         CofThy.Disj.left_invert
           ~zero:(Ok ()) ~seq:MU.iter
-          (Env.cof_thy env) @@ fun cof_thy ->
+          (Env.cof_thy env) <| fun cof_thy ->
         ConvM.run {state; cof_thy; veil = Env.get_veil env; size = Env.size env} m
       with
       | Ok () -> Ok (), state

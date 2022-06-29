@@ -4,7 +4,7 @@ open Basis
 open Cubical
 open CodeUnit
 
-module S = Syntax
+module S = SyntaxData
 module D = Domain
 module RM = RefineMonad
 module Sem = Semantics
@@ -40,7 +40,7 @@ type Tp =
       debug_tactic name;
       tac
     | Virtual _ ->
-      RM.refine_err @@ RefineError.VirtualType
+      RM.refine_err <| RefineError.VirtualType
 
   static member run_virtual : Tp -> S.tp RM.m =
     function
@@ -56,7 +56,7 @@ type Tp =
 
   interface Tactic<Tp> with
     member this.update_span loc =
-      Tp.map @@ RM.update_span loc
+      Tp.map <| RM.update_span loc
     member this.whnf _ tac = tac
   // type tac =
 
@@ -70,7 +70,7 @@ type Tp =
   //     debug_tactic name;
   //     tac
   //   | Virtual _ ->
-  //     RM.refine_err @@ RefineError.VirtualType
+  //     RM.refine_err <| RefineError.VirtualType
 
   // let run_virtual =
   //   function
@@ -85,7 +85,7 @@ type Tp =
   //   | Virtual (name, tac) -> Virtual (name, f tac)
 
   // let update_span loc =
-  //   map @@ RM.update_span loc
+  //   map <| RM.update_span loc
 
   // let whnf ~style:_ tac =
   //   tac
@@ -103,14 +103,14 @@ type Var =
   let prf phi = {tp = D.TpPrf phi; con = D.Prf}
   let con {tp = _; con} = con
   let syn {tp; con} =
-    Syn.rule @@
+    Syn.rule <|
     let+ tm = RM.quote_con tp con in
     tm, tp
 
   let abstract : ?ident:Ident.t -> D.tp -> (Var.tac -> 'a RM.m) -> 'a RM.m =
     fun ?(ident = `Anon) tp kont ->
-    RM.abstract ident tp @@ fun (con : D.con) ->
-    kont @@ {tp; con}
+    RM.abstract ident tp <| fun (con : D.con) ->
+    kont <| {tp; con}
 
 
 and Chk =
@@ -145,10 +145,10 @@ and Chk =
       fun (tp, phi, clo) ->
         debug_tactic name;
         let* tm = tac tp in
-        let* con = RM.lift_ev @@ Sem.eval tm in
+        let* con = RM.lift_ev <| Sem.eval tm in
         let* () =
-          Var.abstract (D.TpPrf phi) @@ fun prf ->
-          RM.equate tp con @<< RM.lift_cmp @@ Sem.inst_tm_clo clo @@ Var.con prf
+          Var.abstract (D.TpPrf phi) <| fun prf ->
+          RM.equate tp con @<< RM.lift_cmp <| Sem.inst_tm_clo clo <| Var.con prf
         in
         RM.ret tm
     | BChk (name, btac) ->
@@ -161,21 +161,21 @@ and Chk =
   let update_span loc =
     function
     | Chk (name, tac) ->
-      rule ~name @@ fun tp ->
-      RM.update_span loc @@ tac tp
+      rule ~name <| fun tp ->
+      RM.update_span loc <| tac tp
     | BChk (name, tac) ->
-      brule ~name @@ fun goal ->
-      RM.update_span loc @@ tac goal
+      brule ~name <| fun goal ->
+      RM.update_span loc <| tac goal
 
   let syn (tac : Syn.tac) : tac =
-    rule @@ fun tp ->
+    rule <| fun tp ->
     let* tm, tp' = Syn.run tac in
     let+ () = RM.equate_tp tp tp' in
     tm
 
   let whnf ~style tac =
-    brule @@ fun (tp, phi, clo) ->
-    RM.lift_cmp @@ Sem.whnf_tp ~style tp |>>
+    brule <| fun (tp, phi, clo) ->
+    RM.lift_cmp <| Sem.whnf_tp ~style tp |>>
     function
     | `Done -> brun tac (tp, phi, clo)
     | `Reduce tp -> brun tac (tp, phi, clo)
@@ -198,16 +198,16 @@ and Syn =
     (name, RM.update_span loc tac)
 
   let ann (tac_tm : Chk.tac) (tac_tp : Tp.tac) : tac =
-    rule @@
+    rule <|
     let* tp = Tp.run tac_tp in
-    let* vtp = RM.lift_ev @@ Sem.eval_tp tp in
+    let* vtp = RM.lift_ev <| Sem.eval_tp tp in
     let+ tm = Chk.run tac_tm vtp in
     tm, vtp
 
   let whnf ~style (name, tac) =
-    rule ~name @@
+    rule ~name <|
     let* tm, tp = tac in
-    RM.lift_cmp @@ Sem.whnf_tp ~style tp |>>
+    RM.lift_cmp <| Sem.whnf_tp ~style tp |>>
     function
     | `Done -> RM.ret (tm, tp)
     | `Reduce tp' -> RM.ret (tm, tp')

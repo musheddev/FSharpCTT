@@ -39,7 +39,7 @@ let opt_width =
 
 let opt_input_file =
   let doc = "The file to typecheck. When $(docv) is -, read standard input." in
-  let parse_dash = Term.(app @@ const @@ Option.map @@ fun str -> if str = "-" then `Stdin else `File str) in
+  let parse_dash = Term.(app <| const <| Option.map <| fun str -> if str = "-" then `Stdin else `File str) in
   Arg.(parse_dash & value & pos ~rev:true 0 (some string) None & info [] ~doc ~docv:"FILE")
 
 let opt_as_file =
@@ -86,5 +86,5 @@ let () =
   let options : options Term.t =
     Term.(ret (const consolidate_options $ opt_mode $ opt_interactive $ opt_width $ opt_input_file $ opt_as_file $ opt_debug))
   in
-  let t = Term.ret @@ Term.(const main $ options) in
-  Term.exit @@ Term.eval ~catch:true ~err:Format.std_formatter (t, myinfo)
+  let t = Term.ret <| Term.(const main $ options) in
+  Term.exit <| Term.eval ~catch:true ~err:Format.std_formatter (t, myinfo)

@@ -24,9 +24,9 @@ module LexingUtil =
         (fst span.stop)
         (snd span.stop)
 
-  let last_token (lexbuf : Stream) = 
-    let tok = lexeme lexbuf in
-    if tok = "" then None else Some tok
-
-  let current_span (lexbuf : Stream) = 
-    {start = lexbuf.lex_start_p; stop = lexbuf.lex_curr_p}
+//  let last_token (lexbuf : Stream) = 
+//    let tok = lexeme lexbuf in
+//    if tok = "" then None else Some tok
+//
+//  let current_span (lexbuf : Stream) = 
+//    {start = lexbuf.lex_start_p; stop = lexbuf.lex_curr_p}

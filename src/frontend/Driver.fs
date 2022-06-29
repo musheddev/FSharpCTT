@@ -25,11 +25,11 @@ type command = continuation RM.m
 (* Refinement Helpers *)
 
 let elaborate_typed_term name (args : CS.cell list) tp tm =
-  RM.push_problem name @@
-  let* tp = RM.push_problem "tp" @@ Tactic.Tp.run @@ Elaborator.chk_tp_in_tele args tp in
-  let* vtp = RM.lift_ev @@ Sem.eval_tp tp in
-  let* tm = RM.push_problem "tm" @@ Tactic.Chk.run (Elaborator.chk_tm_in_tele args tm) vtp in
-  let+ vtm = RM.lift_ev @@ Sem.eval tm in
+  RM.push_problem name <|
+  let* tp = RM.push_problem "tp" <| Tactic.Tp.run <| Elaborator.chk_tp_in_tele args tp in
+  let* vtp = RM.lift_ev <| Sem.eval_tp tp in
+  let* tm = RM.push_problem "tm" <| Tactic.Chk.run (Elaborator.chk_tm_in_tele args tm) vtp in
+  let+ vtm = RM.lift_ev <| Sem.eval tm in
   vtp, vtm
 
 let add_global name vtp con : command =
@@ -48,15 +48,15 @@ let print_ident (ident : Ident.t CS.node) : command =
       | None -> RM.ret None
       | Some con ->
         let* tm = RM.quote_con vtp con in
-        RM.ret @@ Some tm
+        RM.ret <| Some tm
     in
     let+ () =
-      RM.emit ident.info pp_message @@
+      RM.emit ident.info pp_message <|
       OutputMessage (Definition {ident = ident.node; tp; tm})
     in
     Continue Fun.id
   | _ ->
-    RM.throw @@ Err.RefineError (Err.UnboundVariable ident.node, ident.info)
+    RM.throw <| Err.RefineError (Err.UnboundVariable ident.node, ident.info)
 
 let print_fail (name : Ident.t) (info : CS.info) (res : (D.tp * D.con, exn) result) : command =
   match res with
@@ -88,7 +88,7 @@ let print_fail (name : Ident.t) (info : CS.info) (res : (D.tp * D.con, exn) resu
 let protect m =
   RM.trap m |>> function
   | Ok return ->
-    RM.ret @@ Ok return
+    RM.ret <| Ok return
   | Error (Err.RefineError (err, info)) ->
     let+ () = RM.emit ~lvl:`Error info RefineError.pp err in
     Error ()
@@ -118,7 +118,7 @@ let load_current_library ~as_file input =
   with
   | Ok (lib, _) -> Ok lib
   | Error (`InvalidLibrary msg) ->
-    Log.pp_error_message ~loc:None ~lvl:`Error pp_message @@
+    Log.pp_error_message ~loc:None ~lvl:`Error pp_message <|
     ErrorMessage {error = InvalidLibrary msg; last_token = None};
     Error ()
 
@@ -134,20 +134,20 @@ let resolve_source_path lib unitpath =
   match Bantorra.Manager.resolve library_manager lib unitpath ~suffix:".cooltt" with
   | Ok ans -> Ok ans
   | Error (`InvalidLibrary msg) ->
-    Log.pp_error_message ~loc:None ~lvl:`Error pp_message @@
+    Log.pp_error_message ~loc:None ~lvl:`Error pp_message <|
     ErrorMessage {error = InvalidLibrary msg; last_token = None};
     Error ()
   | Error (`UnitNotFound msg) ->
-    Log.pp_error_message ~loc:None ~lvl:`Error pp_message @@
+    Log.pp_error_message ~loc:None ~lvl:`Error pp_message <|
     ErrorMessage {error = UnitNotFound msg; last_token = None};
     Error ()
 
 (* Create an interface file for a given source file. *)
 let rec build_code_unit src_path =
-  RMU.ignore @@ process_file (`File src_path)
+  RMU.ignore <| process_file (`File src_path)
 
 and load_code_unit lib src =
-  RM.with_code_unit lib (CodeUnitID.file src) @@ build_code_unit src
+  RM.with_code_unit lib (CodeUnitID.file src) <| build_code_unit src
 
 and import_code_unit path modifier : command =
   let* lib = RM.get_current_lib in
@@ -164,21 +164,21 @@ and execute_decl : CS.decl -> command =
   | CS.Def {name; args; def = Some def; tp} ->
     Debug.print "Defining %a@." Ident.pp name;
     let* vtp, vtm = elaborate_typed_term (Ident.to_string name) args tp def in
-    add_global name vtp @@ Some vtm
+    add_global name vtp <| Some vtm
   | CS.Def {name; args; def = None; tp} ->
     Debug.print "Defining Axiom %a@." Ident.pp name;
-    let* tp = Tactic.Tp.run @@ Elaborator.chk_tp_in_tele args tp in
-    let* vtp = RM.lift_ev @@ Sem.eval_tp tp in
+    let* tp = Tactic.Tp.run <| Elaborator.chk_tp_in_tele args tp in
+    let* vtp = RM.lift_ev <| Sem.eval_tp tp in
     add_global name vtp None
   | CS.NormalizeTerm term ->
-    RM.veil (Veil.const `Transparent) @@
-    let* tm, vtp = Tactic.Syn.run @@ Elaborator.syn_tm term in
-    let* vtm = RM.lift_ev @@ Sem.eval tm in
+    RM.veil (Veil.const `Transparent) <|
+    let* tm, vtp = Tactic.Syn.run <| Elaborator.syn_tm term in
+    let* vtm = RM.lift_ev <| Sem.eval tm in
     let* tm' = RM.quote_con vtp vtm in
-    let+ () = RM.emit term.info pp_message @@ OutputMessage (NormalizedTerm {orig = tm; nf = tm'}) in
+    let+ () = RM.emit term.info pp_message <| OutputMessage (NormalizedTerm {orig = tm; nf = tm'}) in
     Continue Fun.id
   | CS.Fail {name; args; def; tp; info} ->
-    let* res = RM.trap @@ elaborate_typed_term (Ident.to_string name) args tp def in
+    let* res = RM.trap <| elaborate_typed_term (Ident.to_string name) args tp def in
     print_fail name info res
   | CS.Print ident ->
     print_ident ident
@@ -192,24 +192,24 @@ and execute_signature ~status sign =
   match sign with
   | [] -> RM.ret status
   | d :: sign ->
-    let* res = protect @@ execute_decl d in
+    let* res = protect <| execute_decl d in
     match res with
     | Ok Continue k ->
-      k @@ execute_signature ~status sign
+      k <| execute_signature ~status sign
     | Ok Quit ->
-      RM.ret @@ Ok ()
+      RM.ret <| Ok ()
     | Error () ->
-      RM.ret @@ Error ()
+      RM.ret <| Error ()
 
 and process_file input =
   match Load.load_file input with
   | Ok sign -> execute_signature ~status:(Ok ()) sign
   | Error (Load.ParseError err) ->
-    Log.pp_error_message ~loc:(Some err.span) ~lvl:`Error pp_message @@ ErrorMessage {error = ParseError; last_token = err.last_token};
-    RM.ret @@ Error ()
+    Log.pp_error_message ~loc:(Some err.span) ~lvl:`Error pp_message <| ErrorMessage {error = ParseError; last_token = err.last_token};
+    RM.ret <| Error ()
   | Error (Load.LexingError err) ->
-    Log.pp_error_message ~loc:(Some err.span) ~lvl:`Error pp_message @@ ErrorMessage {error = LexingError; last_token = err.last_token};
-    RM.ret @@ Error ()
+    Log.pp_error_message ~loc:(Some err.span) ~lvl:`Error pp_message <| ErrorMessage {error = LexingError; last_token = err.last_token};
+    RM.ret <| Error ()
 
 let load_file ~as_file ~debug_mode input =
   match load_current_library ~as_file input with
@@ -217,34 +217,34 @@ let load_file ~as_file ~debug_mode input =
   | Ok lib ->
     Debug.debug_mode debug_mode;
     let unit_id = assign_unit_id ~as_file input in
-    RM.run_exn ST.init (Env.init lib) @@
-    RM.with_code_unit lib unit_id @@
+    RM.run_exn ST.init (Env.init lib) <|
+    RM.with_code_unit lib unit_id <|
     process_file input
 
 let execute_command =
   function
   | CS.Decl decl -> execute_decl decl
-  | CS.NoOp -> RM.ret @@ Continue Fun.id
+  | CS.NoOp -> RM.ret <| Continue Fun.id
   | CS.EndOfFile -> RM.ret Quit
 
 let rec repl lib (ch : in_channel) lexbuf =
   match Load.load_cmd lexbuf with
   | Error (Load.ParseError {span; last_token}) ->
-    let* () = RM.emit ~lvl:`Error (Some span) pp_message @@ ErrorMessage {error = ParseError; last_token} in
+    let* () = RM.emit ~lvl:`Error (Some span) pp_message <| ErrorMessage {error = ParseError; last_token} in
     repl lib ch lexbuf
   | Error (Load.LexingError {span; last_token}) ->
-    let* () = RM.emit ~lvl:`Error (Some span) pp_message @@ ErrorMessage {error = LexingError; last_token} in
+    let* () = RM.emit ~lvl:`Error (Some span) pp_message <| ErrorMessage {error = LexingError; last_token} in
     repl lib ch lexbuf
   | Ok cmd ->
-    protect @@ execute_command cmd |>>
+    protect <| execute_command cmd |>>
     function
     | Ok (Continue k) ->
-      k @@ repl lib ch lexbuf
+      k <| repl lib ch lexbuf
     | Error _  ->
       repl lib ch lexbuf
     | Ok Quit ->
       close_in ch;
-      RM.ret @@ Ok ()
+      RM.ret <| Ok ()
 
 let do_repl ~as_file ~debug_mode =
   match load_current_library ~as_file `Stdin with
@@ -253,6 +253,6 @@ let do_repl ~as_file ~debug_mode =
     Debug.debug_mode debug_mode;
     let unit_id = assign_unit_id ~as_file `Stdin in
     let ch, lexbuf = Load.prepare_repl () in
-    RM.run_exn RefineState.init (Env.init lib) @@
-    RM.with_code_unit lib unit_id @@
+    RM.run_exn RefineState.init (Env.init lib) <|
+    RM.with_code_unit lib unit_id <|
     repl lib ch lexbuf

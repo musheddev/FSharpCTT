@@ -40,7 +40,7 @@ let pp_connective fmt =
     Format.fprintf fmt "hcom"
 
 let pp_path fmt p =
-  Uuseg_string.pp_utf_8 fmt @@
+  Uuseg_string.pp_utf_8 fmt <|
   match p with
   | [] -> "."
   | _ -> String.concat "." p
@@ -87,7 +87,7 @@ let pp fmt =
 exception RefineError of t * LexingUtil.span option
 
 let _ =
-  PpExn.install_printer @@ fun fmt ->
+  PpExn.install_printer <| fun fmt ->
   function
   | RefineError (err, _loc) ->
     pp fmt err

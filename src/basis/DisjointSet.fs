@@ -19,18 +19,13 @@ module DisjointSet =
 
   let find (x : 'key) (h : 't) =
     let rec loop x p =
-      match
-        PersistentTable.get_opt x p
-      with
+      match (PersistentTable.get_opt x p) with
       | Some x -> loop x p
       | None -> x
-    in
     loop x h.parent
 
   let get_rank (cx : 'key) h =
-    match
-      PersistentTable.get_opt cx h.rank
-    with
+    match PersistentTable.get_opt cx h.rank with
     | Some r -> r
     | _ -> 0
 

@@ -3,29 +3,31 @@ namespace Cubical
 open Basis
 open Bwd
 
-type var = int
-type cof = (Dim, var) Cof
 
-let dump_var fmt i = fprintf fmt "L[%i]" i
+type cof = (Dim, int) Cof
 
-let dump_cof = Cof.dump_cof Dim.dump dump_var
+//let dump_var fmt i = fprintf fmt "L[%i]" i
+
+//let dump_cof = Cof.dump_cof Dim.dump dump_var
 
 
-type UF = DisjointSet<Dim>
-type VarSet = Set<var>
+type UF = DisjointSet<Dim,Set<int>>
+
+
 
 (** A presentation of an algebraic theory over the language of intervals and cofibrations. *)
 type alg_thy' =
   { classes : UF;
     (** equivalence classes of dimensions *)
 
-    true_vars : VarSet
+    true_vars : Set<int>
+    
   }
 
 type eq = Dim * Dim
 
 (** A [branch] represents the meet of a bunch of atomic cofibrations. *)
-type branch = VarSet * eq list
+type branch = Set<int> * eq list
 type branches = branch list
 
 (** A [cached_branch] is a [branch] together with an algebraic theory
@@ -50,24 +52,25 @@ type disj_thy = cached_branches
   * 2. Should we eagerly factor out common cofibrations to facilitate the refactoring
   *    steps later on? (This does not seem to be helpful in preliminary experiments.)
 *)
-let rec dissect_cofibrations : cof list -> branches =
-  function
-  | [] -> [VarSet.empty, []]
-  | cof :: cofs ->
-    match cof with
-    | Cof.Var v ->
-      List.map (fun (vars, eqs) -> VarSet.add v vars, eqs) @@
-      dissect_cofibrations cofs
-    | Cof.Cof cof ->
+module Dissect =
+  let rec dissect_cofibrations : cof list -> branches =
+    function
+    | [] -> [Set.empty, []]
+    | cof :: cofs ->
       match cof with
-      | Cof.Meet meet_cofs ->
-        dissect_cofibrations @@ meet_cofs @ cofs
-      | Cof.Join join_cofs ->
-        join_cofs |> List.concat_map @@ fun join_cof ->
-        dissect_cofibrations @@ join_cof :: cofs
-      | Cof.Eq (r, s) ->
-        List.map (fun (vars, eqs) -> vars, (r, s) :: eqs) @@
+      | Cof.Var v ->
+        List.map (fun (vars, eqs) -> Set.add v vars, eqs) <|
         dissect_cofibrations cofs
+      | Cof.Cof cof ->
+        match cof with
+        | Cof.Meet meet_cofs ->
+          dissect_cofibrations <| meet_cofs @ cofs
+        | Cof.Join join_cofs ->
+          join_cofs |> List.concat_map <| fun join_cof ->
+          dissect_cofibrations <| join_cof :: cofs
+        | Cof.Eq (r, s) ->
+          List.map (fun (vars, eqs) -> vars, (r, s) :: eqs) <|
+          dissect_cofibrations cofs
 
 module Alg =
 
@@ -75,8 +78,8 @@ module Alg =
   type t' = alg_thy'
 
   let emp' =
-    {classes = UF.empty;
-     true_vars = VarSet.empty}
+    {classes = DisjointSet.empty;
+     true_vars = Set.empty}
 
   let empty =
     Consistent emp'
@@ -87,32 +90,32 @@ module Alg =
     | Inconsistent -> Inconsistent
 
   let assume_vars (thy : t') vars =
-    {thy with true_vars = VarSet.union vars thy.true_vars}
+    {thy with true_vars = Set.union vars thy.true_vars}
 
   let test_eq (thy : t') (r, s) =
-    UF.test r s thy.classes
+    DisjointSet.test r s thy.classes
 
   (** [unsafe_test_and_assume_eq] fuses [test_eq] and [assume_eq] (if there was one).
     * It is "unsafe" because we do not check consistency here. *)
   let unsafe_test_and_assume_eq (thy : t') (r, s) =
-    let testing, classes = UF.test_and_union r s thy.classes in
+    let testing, classes = DisjointSet.test_and_union r s thy.classes in
     testing, {thy with classes}
 
   let test_eqs (thy : t') eqs =
-    List.for_all (test_eq thy) eqs
+    List.forall (test_eq thy) eqs
 
   let test_var (thy : t') v =
-    VarSet.mem v thy.true_vars
+    Set.mem v thy.true_vars
 
   let test_vars (thy : t') vs =
-    VarSet.subset vs thy.true_vars
+    Set.isSubset vs thy.true_vars
 
   let test_branch (thy : t') (vars, eqs) =
     test_vars thy vars && test_eqs thy eqs
 
   (** [reduced_vars] takes out redundant cofibration variables. *)
   let reduce_vars (thy : t') vars =
-    VarSet.diff vars thy.true_vars
+    Set.difference vars thy.true_vars
 
   (** [reduce_eqs] detects inconsistency of an equation set and takes out
     * redundant equations. *)
@@ -171,12 +174,13 @@ module Alg =
     | `Consistent thy' ->
       match dissect_cofibrations cofs with
       | [] -> []
-      | [vars, []] when VarSet.is_empty vars -> [`Consistent thy']
+      | [vars, []] when Set
+      .is_empty vars -> [`Consistent thy']
       | dissected_cofs ->
         begin
-          drop_useless_branches @@
+          drop_useless_branches <|
           reduce_branches thy' dissected_cofs
-        end |> List.map @@ fun (thy', _) -> `Consistent thy'
+        end |> List.map <| fun (thy', _) -> `Consistent thy'
 
   (** [test] checks whether a cofibration is true within an algebraic theory *)
   let rec test (thy' : alg_thy') : cof -> bool =
@@ -199,14 +203,15 @@ module Alg =
     | [] -> zero
     | [thy] -> cont thy
     | thys -> seq cont thys
-end
+
 
 module Disj =
 struct
   type t = disj_thy
 
   let envelop_alg' alg_thy' : disj_thy =
-    [alg_thy', (VarSet.empty, [])]
+    [alg_thy', (Set
+    .empty, [])]
 
   let envelope_alg =
     function
@@ -214,12 +219,13 @@ struct
     | `Inconsistent -> []
 
 
-  let empty : t = [Alg.emp', (VarSet.empty, [])]
+  let empty : t = [Alg.emp', (Set
+  .empty, [])]
 
   let consistency =
     function
-    | [] -> `Inconsistent
-    | _ -> `Consistent
+    | [] -> Inconsistent
+    | _ -> Consistent
 
   (** [refactor_branches] attempts to identify common parts of the branches
     * and shrink the labels. Recall that we do not keep the common ancestor
@@ -231,9 +237,11 @@ struct
   *)
   let refactor_branches cached_branches : t =
     let common_vars =
-      let go vars0 (_, (vars1, _)) = VarSet.inter vars0 vars1 in
+      let go vars0 (_, (vars1, _)) = Set
+      .inter vars0 vars1 in
       match cached_branches with
-      | [] -> VarSet.empty
+      | [] -> Set
+      .empty
       | (_, (vars, _)) :: branches -> List.fold_left go vars branches
     in
     (* The following is an approximation of checking whether some equation is useful.
@@ -252,10 +260,11 @@ struct
      * enough to detect them. One could consider more aggressive approaches if [CofThy]
      * becomes the bottleneck again.
     *)
-    let useful eq = cached_branches |> List.exists @@ fun (thy', _) -> not @@ Alg.test_eq thy' eq in
+    let useful eq = cached_branches |> List.exists <| fun (thy', _) -> not <| Alg.test_eq thy' eq in
     (* revisit all branches and remove all useless ones identified by the simple criterion above. *)
-    cached_branches |> List.map @@ fun (thy', (vars, eqs)) ->
-    thy', (VarSet.diff vars common_vars, List.filter useful eqs)
+    cached_branches |> List.map <| fun (thy', (vars, eqs)) ->
+    thy', (Set
+    .diff vars common_vars, List.filter useful eqs)
 
   (** [split thy cofs] adds to the theory [thy] the conjunction of a list of cofibrations [cofs]
     * and calculate the branches accordingly. This is similar to [Alg.split] in the spirit but
@@ -263,26 +272,28 @@ struct
   let split (thy : t) (cofs : cof list) : t =
     match dissect_cofibrations cofs with
     | [] -> []
-    | [vars, []] when VarSet.is_empty vars -> thy
+    | [vars, []] when Set
+    .is_empty vars -> thy
     | dissected_cofs ->
       Alg.drop_useless_branches begin
-        thy |> List.concat_map @@ fun (thy', (vars, eq)) ->
-        Alg.reduce_branches thy' dissected_cofs |> List.map @@ fun (thy', (sub_vars, sub_eqs)) ->
-        thy', (VarSet.union vars sub_vars, eq @ sub_eqs)
+        thy |> List.concat_map <| fun (thy', (vars, eq)) ->
+        Alg.reduce_branches thy' dissected_cofs |> List.map <| fun (thy', (sub_vars, sub_eqs)) ->
+        thy', (Set
+        .union vars sub_vars, eq @ sub_eqs)
       end
 
   (** [assume thy cofs] is the same as [split thy cofs] except that it further refactors the
     * branches to optimize future searching. *)
   let assume (thy : t) (cofs : cof list) : t =
-    refactor_branches @@ split thy cofs
+    refactor_branches <| split thy cofs
 
   let test_sequent thy cx cof =
     begin
       split thy cx |> List.map (fun (thy', _) -> thy')
-    end |> List.for_all @@ fun thy' -> Alg.test thy' cof
+    end |> List.for_all <| fun thy' -> Alg.test thy' cof
 
   let left_invert ~zero ~seq thy cont =
-    match thy |> List.map @@ fun (thy', _) -> `Consistent thy' with
+    match thy |> List.map <| fun (thy', _) -> `Consistent thy' with
     | [] -> zero
     | [thy'] -> cont thy'
     | thy's -> seq cont thy's

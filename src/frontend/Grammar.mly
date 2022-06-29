@@ -279,7 +279,7 @@ plain_term:
 
 plain_term_except_cof_case:
   | spine = ioption(nonempty_list_left_recursive(name)); arg1 = atomic_term_except_name; args2 = list(atomic_term)
-    { ap_or_atomic (List.concat [List.map term_of_name @@ Option.value ~default:[] spine; [arg1]; args2]) }
+    { ap_or_atomic (List.concat [List.map term_of_name <| Option.value ~default:[] spine; [arg1]; args2]) }
   | spine = nonempty_list_left_recursive(name)
     { ap_or_atomic (List.map term_of_name spine) }
   | t = term; PROJ; lbl = path; spine = list_left_recursive(atomic_term)

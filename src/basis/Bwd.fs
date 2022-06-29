@@ -4,7 +4,7 @@ type 'a bwd =
   | Emp
   | Snoc of 'a bwd * 'a
 
-//[@@deriving show]
+//[<|deriving show]
 
 module BwdNotation =
 
@@ -133,5 +133,5 @@ module Bwd =
 
   (* favonia: the following is considered ILL-TYPED!
    *
-   * let rev xs = from_list @@ List.rev @@ to_list xs *)
+   * let rev xs = from_list <| List.rev <| to_list xs *)
 

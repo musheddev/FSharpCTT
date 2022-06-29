@@ -1,12 +1,13 @@
 namespace Basis
 open Bwd
+open FSharpPlus.Data
 
-// type S = 
-//   type 'a m
+type S<'a,'m> = 
+   //type 'a m
 
-//   val ret : 'a -> 'a m
+   abstract member ret : 'a -> 'm<'a>
 
-//   val bind : 'a m -> ('a -> 'b m) -> 'b m
+   abstract member bind : 'a m -> ('a -> 'b m) -> 'b m
 
 
 // type Bind =
@@ -24,6 +25,16 @@ open Bwd
 //   abstract ``(@<<`` : ('a -> 'b m) -> 'a m -> 'b m
 //   abstract ``<&>`` : 'a m -> 'b m -> ('a * 'b) m
 
+
+//module Notation =
+//    let  ``let*`` (m : ^m<'a> when ^m : member _.bind) (bind : 'a -> 'm<'b>) : 'm<'b>  = 
+//    let ``and*`` : 'a 'm -> 'b 'm -> ('a * 'b) 'm 
+//   abstract ``let+`` : 'a m -> ('a -> 'b) -> 'b m
+//   abstract ``and+`` : 'a m -> 'b m -> ('a * 'b) m
+//   abstract ``<@>`` : ('a -> 'b) -> 'a m -> 'b m
+//   abstract ``|>>`` : 'a m -> ('a -> 'b m) -> 'b m
+//   abstract ``(@<<`` : ('a -> 'b m) -> 'a m -> 'b m
+//   abstract ``<&>`` : 'a m -> 'b m -> ('a * 'b) m
 
 // module Notation = 
 //     let inline ``let*`` = () 
@@ -47,7 +58,9 @@ open Bwd
 //   let (@<<) f m = m |>> f
 //   let (<&>) = (and+)
 // end
-
+//type Notation<'M>() =
+//    abstract member ``let*`` = 'M.bind
+    
 // module Util (M : S) =
 // struct
 //   open Notation (M)
@@ -169,7 +182,7 @@ open Bwd
 // module MonadReaderResult (X : sig type local end) =
 // struct
 //   type 'a m = X.local -> ('a, exn) result
-
+(*
 module MonadReaderResult =
     type m<'a,'local> = 'local -> Result<'a,exn>
     type MonadReaderResult<'local>() =
@@ -188,7 +201,7 @@ module MonadReaderResult =
             Ok (m env)
 
         static member read (env : 'local) = Ok env
-        static member scope f (m : m<'a,'local>) (env : 'local) = m @@ f env
+        static member scope f (m : m<'a,'local>) (env : 'local) = m <| f env
 
         static member run (env : 'local) (m : m<'a,'local>) = m env
 
@@ -239,7 +252,7 @@ module MonadReaderStateResult =
             | (Ok a, st') -> (a, st')
             | (Error exn, _) -> raise exn
 
-
+*)
 // end
 
 // module MonadReaderStateResult (X : sig type global type local end) =

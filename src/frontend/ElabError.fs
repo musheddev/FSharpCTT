@@ -43,7 +43,7 @@ let pp fmt =
 exception ElabError of t * LexingUtil.span option
 
 let _ =
-  PpExn.install_printer @@ fun fmt ->
+  PpExn.install_printer <| fun fmt ->
   function
   | ElabError (err, _loc) ->
     pp fmt err

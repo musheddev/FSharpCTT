@@ -5,7 +5,7 @@ open Bwd
 open Cubical
 open CodeUnit
 
-module S = Syntax
+module S = SyntaxData
 module D = Domain
 // module J = Ezjsonm
 
@@ -34,11 +34,11 @@ module D = Domain
 //   List.map (json_to_pair json_to_a json_to_b) j_alist
 
 // let json_of_bwd json_of_el bwd : J.value =
-//   `A (Bwd.to_list @@ Bwd.map json_of_el bwd)
+//   `A (Bwd.to_list <| Bwd.map json_of_el bwd)
 
 // let json_to_bwd json_to_el : J.value -> 'a bwd =
 //   function
-//   | `A xs -> Bwd.map json_to_el @@ Bwd.from_list xs
+//   | `A xs -> Bwd.map json_to_el <| Bwd.from_list xs
 //   | j -> J.parse_error j "json_to_bwd"
 
 // let labeled lbl v = `A (`String lbl :: v)
@@ -70,7 +70,7 @@ module D = Domain
 
 // let json_to_labeled json_to_el =
 //   function
-//   | `O j_els -> j_els |> List.map @@ fun (j_path, j_el) ->
+//   | `O j_els -> j_els |> List.map <| fun (j_path, j_el) ->
 //     let path = String.split_on_char '.' j_path in
 //     let tm = json_to_el j_el in
 //     (path, tm)
@@ -81,8 +81,8 @@ module D = Domain
 //   let json_of_cof_f (json_of_r : 'r -> J.value) (json_of_a : 'a -> J.value) : ('r, 'a) Cof.cof_f -> J.value =
 //     function
 //     | Eq (r0, r1) -> labeled "eq" [json_of_r r0; json_of_r r1]
-//     | Join xs -> labeled "join" @@ List.map json_of_a xs
-//     | Meet xs -> labeled "meet" @@ List.map json_of_a xs
+//     | Join xs -> labeled "join" <| List.map json_of_a xs
+//     | Meet xs -> labeled "meet" <| List.map json_of_a xs
 
 //   let rec json_of_cof (json_of_r : 'r -> J.value) (json_of_v : 'v -> J.value) : ('r, 'v) Cof.cof -> J.value =
 //     function
@@ -135,7 +135,7 @@ module D = Domain
 //     | S.Dim1 -> `String "dim1"
 //     | S.Cof cof -> labeled "cof" [Cof.json_of_cof_f json_of_tm json_of_tm cof]
 //     | S.ForallCof cof -> labeled "forall" [json_of_tm cof]
-//     | S.CofSplit branches -> labeled "split" @@ List.map (fun (tphi, tm) -> json_of_pair (json_of_tm tphi) (json_of_tm tm)) branches
+//     | S.CofSplit branches -> labeled "split" <| List.map (fun (tphi, tm) -> json_of_pair (json_of_tm tphi) (json_of_tm tm)) branches
 //     | S.Prf -> `String "prf"
 //     | S.ElIn tm -> labeled "el_in" [json_of_tm tm]
 //     | S.ElOut tm -> labeled "el_out" [json_of_tm tm]
@@ -171,7 +171,7 @@ module D = Domain
 //     | S.TpDim -> `String "dim"
 //     | S.TpCof -> `String "cof"
 //     | S.TpPrf tm -> labeled "prf" [json_of_tm tm]
-//     | S.TpCofSplit branches -> labeled "split" @@ List.map (fun (cof, tp) -> json_of_pair (json_of_tm cof) (json_of_tp tp)) branches
+//     | S.TpCofSplit branches -> labeled "split" <| List.map (fun (cof, tp) -> json_of_pair (json_of_tm cof) (json_of_tp tp)) branches
 //     | S.Sub (tp, tphi, tm) -> labeled "sub" [json_of_tp tp; json_of_tm tphi; json_of_tm tm]
 //     | S.Pi (base, nm, fib) -> labeled "pi" [json_of_tp base; json_of_ident nm; json_of_tp fib ]
 //     | S.Sg (base, nm, fib) -> labeled "sg" [json_of_tp base; json_of_ident nm; json_of_tp fib ]
@@ -425,7 +425,7 @@ module D = Domain
 
 //   let json_to_ctx : J.value -> (Ident.t * S.tp) list =
 //     function
-//     | `A j_ctx -> j_ctx |> List.map @@ fun binding ->
+//     | `A j_ctx -> j_ctx |> List.map <| fun binding ->
 //       json_to_pair json_to_ident json_to_tp binding
 //     | j -> J.parse_error j "Syntax.json_to_ctx"
 // end
@@ -714,7 +714,7 @@ module D = Domain
 
 // let deserialize_bindings : J.t -> (Ident.t * D.tp * D.con option) list =
 //   function
-//   | `A j_bindings -> j_bindings |> List.map @@
+//   | `A j_bindings -> j_bindings |> List.map <|
 //     begin
 //       function
 //       | `A [j_nm; j_tp; j_con] -> (json_to_ident j_nm, Domain.json_to_tp j_tp, J.get_option Domain.json_to_con j_con)

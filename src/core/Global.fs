@@ -19,7 +19,7 @@ type Global =
   { origin : CodeUnitId;
     index : int;
     name : string option }
-  ///[@@deriving show]
+  ///[<|deriving show]
   
 with
   static member compare (s1 : Global) (s2 : Global) = s1.index.CompareTo(s2.index)
