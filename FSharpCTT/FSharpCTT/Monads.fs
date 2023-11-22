@@ -2,11 +2,9 @@ module Core.Monads
 
 open FSharpPlus
 open FSharpPlus.Data
-open Basis
-open Cubical
-open Bwd
 
-open CodeUnit
+open Cubical
+
 
 module D = DomainData
 module S = SyntaxData

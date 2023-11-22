@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "cCWLJRAfn7aC11Ztu3UcQHS0Wrq3xAE/CkLgs47VMWcbN6lYqrt14Xw29Wczd1HrL4hhqUwyGNi2jwq65r9Xaw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Orlando\\Desktop\\Projects2022\\FSharpCTT\\FSharpCTT\\FSharpCTT\\FSharpCTT.fsproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Orlando\\.nuget\\packages\\fsharp.core\\7.0.0\\fsharp.core.7.0.0.nupkg.sha512",
+    "C:\\Users\\Orlando\\.nuget\\packages\\fsharpplus\\1.3.2\\fsharpplus.1.3.2.nupkg.sha512"
+  ],
+  "logs": []
+}

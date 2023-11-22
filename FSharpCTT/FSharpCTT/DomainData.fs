@@ -1,6 +1,7 @@
 module Core.DomainData
 //open Basis
 open Cubical
+open SyntaxData
 //open Bwd
 
 
@@ -40,12 +41,12 @@ type 'a unstable_code =
     (** V types, for univalence *)
   
 
-type env<'a> = {tpenv : tp<'a> bwd; conenv: con<'a> bwd}
+type env<'a> = {tpenv : tp<'a> list; conenv: con<'a> list}
 
 (** A {i closure} combines a semantic environment with a syntactic object binding an additional variable. *)
 and 'a clo = Closure of ('a * env<'a>)
 and 'a tp_clo = clo<SyntaxData.tp<'a>>
-and 'a tm_clo = clo<SyntaxData.SyntaxData<'a>>
+and 'a tm_clo = clo<SyntaxData.term<'a>>
 and 'a sign_clo = clo<SyntaxData.sign<'a>>
 
 

@@ -4,6 +4,21 @@ open Cubical
 
 module SyntaxData =
 
+  type Ident =
+    | Anon
+    | User of string list
+    | Machine of string
+  
+  type Global =
+    { index : int;
+      name : string option }
+    
+  with
+    static member compare (s1 : Global) (s2 : Global) = s1.index.CompareTo(s2.index)
+
+    static member equal s1 s2 =
+      s1.index = s2.index
+  
   type term<'s> =
     | Var of int
     | Global of Global

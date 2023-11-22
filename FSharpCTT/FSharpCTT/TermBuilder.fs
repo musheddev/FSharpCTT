@@ -1,6 +1,5 @@
 module Core.TermBuilder
-open Basis
-open Bwd
+
 open Cubical
 
 open FSharpPlus
@@ -62,43 +61,57 @@ open M
 //open Monad.Notation (M)
 //module MU = Monad.Util (M)
 
-type 'a b = S.term m -> 'a m
+//type 'a b = S.term m -> 'a m
 
 let el_in m : _ m =
-  fun local -> 
-  //let+ tm = m in
-  S.ElIn (m local)
+  monad' {
+    let! tm = m
+    S.ElIn tm
+    }
+  // let+ tm = m in
+  // S.ElIn tm
 
 let tp_locked_prf mphi : _ m =
-  let+ phi = mphi in
-  S.TpLockedPrf phi
+   monad' {
+    let! phi = mphi 
+    S.TpLockedPrf phi
+   }
 
 let locked_prf_in mprf : _ m =
-  let+ prf = mprf in
-  S.LockedPrfIn prf
+  monad' {
+    let! prf = mprf 
+    S.LockedPrfIn prf
+  }
 
-let locked_prf_unlock mtp ~cof ~prf ~bdy =
-  let+ tp = mtp
-  and+ cof = cof
-  and+ prf = prf
-  and+ bdy = bdy in
-  S.LockedPrfUnlock {tp; cof; prf; bdy}
+let locked_prf_unlock mtp cof prf bdy =
+  monad' {
+    let! tp = mtp
+    let! cof = cof
+    let! prf = prf
+    let! bdy = bdy
+    S.LockedPrfUnlock (tp, cof, prf, bdy)
+  }
+
 
 
 let el_out m : _ m =
-  let+ tm = m in
-  S.ElOut tm
+   monad' {
+    let! tm = m
+    S.ElOut tm
+   }
 
-let lam ?(ident = `Anon) mbdy : _ m =
+let lam ident mbdy : _ m =
   scope <| fun var ->
-  let+ bdy = mbdy var in
-  S.Lam (ident, bdy)
+    monad' {
+      let! bdy = mbdy var in
+      S.Lam (ident, bdy)
+    }
 
 let lams idents mbdy : _ m =
   let rec go vars =
     function
     | [] -> mbdy (Bwd.to_list vars)
-    | (ident :: idents) -> lam ~ident <| fun var -> go (Snoc (vars, var)) idents
+    | (ident :: idents) -> lam ident <| fun var -> go (Snoc (vars, var)) idents
   in go Emp idents
 
 let rec ap m0 ms : _ m =
@@ -110,34 +123,45 @@ let rec ap m0 ms : _ m =
     ap (ret (S.Ap (x0, x1))) ms
 
 let coe mline mr ms mbdy =
-  let+ line = mline
-  and+ r = mr
-  and+ s = ms
-  and+ bdy = mbdy in
-  S.Coe (line, r, s, bdy)
+  monad' {
+    let! line = mline
+    and! r = mr
+    and! s = ms
+    and! bdy = mbdy
+    S.Coe (line, r, s, bdy)
+  }
 
 
 let hcom mcode mr ms mphi mbdy =
-  let+ code = mcode
-  and+ r = mr
-  and+ s = ms
-  and+ phi = mphi
-  and+ bdy = mbdy in
-  S.HCom (code, r, s, phi, bdy)
+  monad' {
+    let! code = mcode
+    and! r = mr
+    and! s = ms
+    and! phi = mphi
+    and! bdy = mbdy
+    S.HCom (code, r, s, phi, bdy)
+  }
+
 
 let com mline mr ms mphi mbdy =
-  let+ line = mline
-  and+ r = mr
-  and+ s = ms
-  and+ phi = mphi
-  and+ bdy = mbdy in
-  S.Com (line, r, s, phi, bdy)
+  monad' {
+    let! line = mline
+    and! r = mr
+    and! s = ms
+    and! phi = mphi
+    and! bdy = mbdy
+    S.Com (line, r, s, phi, bdy)
+  }
 
 
-let let_ ?(ident = `Anon) m k : _ m =
-  let+ t = m
-  and+ bdy = scope k in
-  S.Let (t, ident, bdy)
+
+let let_ ident m k : _ m =
+  monad' {
+    let! tm = m
+    let! bdy = k tm
+    S.Let (ident, tm, bdy)
+  }
+
 
 let pair m0 m1 =
   let+ x0 = m0

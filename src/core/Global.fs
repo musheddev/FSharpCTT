@@ -16,7 +16,7 @@ type CodeUnitId  = | Id of string | TopLevel
 
 
 type Global =
-  { origin : CodeUnitId;
+  { 
     index : int;
     name : string option }
   ///[<|deriving show]

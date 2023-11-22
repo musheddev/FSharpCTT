@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpCTT", "FSharpCTT\FSharpCTT.fsproj", "{C623D043-1AC9-43C2-BE9E-EF156536B4F9}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpCubicalTypeTheory", "..\src\FSharpCubicalTypeTheory.fsproj", "{2717D611-BF20-44AC-8515-06FEFDCADCCF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C623D043-1AC9-43C2-BE9E-EF156536B4F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C623D043-1AC9-43C2-BE9E-EF156536B4F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C623D043-1AC9-43C2-BE9E-EF156536B4F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C623D043-1AC9-43C2-BE9E-EF156536B4F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2717D611-BF20-44AC-8515-06FEFDCADCCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2717D611-BF20-44AC-8515-06FEFDCADCCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2717D611-BF20-44AC-8515-06FEFDCADCCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2717D611-BF20-44AC-8515-06FEFDCADCCF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
